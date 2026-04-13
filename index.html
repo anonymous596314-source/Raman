@@ -1563,15 +1563,16 @@ span.pronounce-wrong {
     </div>
     <!-- 英文學習 Modal (Anki 系統) -->
     <div class="modal-overlay" id="englishModal">
-        <div class="modal-content" style="max-width: 650px; text-align: center; display:flex; flex-direction:column; gap:16px;">
+        <div class="modal-content" style="max-width: 750px; text-align: center; display:flex; flex-direction:column; gap:16px;">
             <div class="modal-header">
                 <h2>📝 每日英文學習卡</h2>
                 <button class="close-btn" id="closeEnglishBtn">&times;</button>
             </div>
             
-            <div style="display:flex; justify-content:center; gap:10px; margin-bottom: 8px;">
-                <button id="tabFlashcardBtn" class="btn primary-btn" style="width:auto; padding:8px 24px;">🗂️ 單字卡模式</button>
-                <button id="tabArticleBtn" class="btn secondary-btn" style="width:auto; padding:8px 24px;">📖 短文閱讀模式</button>
+            <div style="display:flex; justify-content:center; gap:8px; margin-bottom: 8px; flex-wrap:wrap;">
+                <button id="tabFlashcardBtn" class="btn primary-btn" style="width:auto; padding:8px 20px;">🗂️ 單字卡</button>
+                <button id="tabArticleBtn" class="btn secondary-btn" style="width:auto; padding:8px 20px;">📖 短文閱讀</button>
+                <button id="tabGamesBtn" class="btn secondary-btn" style="width:auto; padding:8px 20px; background:rgba(139,92,246,0.2); border-color:rgba(139,92,246,0.5); color:#c4b5fd;">🎮 益智遊戲</button>
             </div>
 
             <!-- 單字卡模式區塊 -->
@@ -1676,6 +1677,24 @@ span.pronounce-wrong {
                 <div id="articleScorePanel" class="glass-panel" style="display:none; background: rgba(0,0,0,0.3); padding: 20px; border:1px solid rgba(255,255,255,0.05); text-align:left;">
                     <h4 style="color:#34d399; margin-bottom:12px;">🎙️ 發音評分結果 (<span id="articleScoreVal">0</span>%)</h4>
                     <p id="articleRecordResult" style="font-size:15px; line-height:1.8; color:#94a3b8;"></p>
+                </div>
+            </div>
+
+            <!-- 🎮 益智遊戲區塊 -->
+            <div id="gamesSection" style="display:none; flex-direction:column; gap:16px;">
+                <!-- 遊戲選單 -->
+                <div id="gameMenuView">
+                    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:10px; max-height:65vh; overflow-y:auto; padding:4px;">
+                    </div>
+                </div>
+                <!-- 遊戲畫面 -->
+                <div id="gamePlayView" style="display:none; flex-direction:column; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button id="backToGameMenuBtn" class="btn secondary-btn" style="padding:6px 14px; font-size:13px;">← 返回選單</button>
+                        <span id="currentGameTitle" style="font-size:16px; font-weight:700; color:#c4b5fd;"></span>
+                        <span id="gameScoreDisplay" style="margin-left:auto; font-size:14px; color:#fbbf24;"></span>
+                    </div>
+                    <div id="gameContainer" style="min-height:400px;"></div>
                 </div>
             </div>
         </div>
@@ -3176,10 +3195,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const m = String(now.getMonth() + 1).padStart(2, '0');
         const d = String(now.getDate()).padStart(2, '0');
         const dateStr = `${y}.${m}.${d}`;
-        
+
+        // ── 1. 取得台積電現價（優先用庫存已更新的值）──────────────────
         let tsmcPrice = 0;
-        
-        const tsmcItem = inventory.find(i => i.code.trim().startsWith('2330')) || shortTermInventory.find(i => i.code.trim().startsWith('2330'));
+        const tsmcItem = inventory.find(i => i.code.trim().startsWith('2330'))
+                      || shortTermInventory.find(i => i.code.trim().startsWith('2330'));
         if (tsmcItem && tsmcItem.currentPrice) {
             tsmcPrice = tsmcItem.currentPrice;
         } else {
@@ -3195,21 +3215,37 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch(e) {}
         }
 
-        const totalCostV = window.parseFloat(document.getElementById('totalInventoryCost')?.textContent || '0');
-        const totalMarketV = window.parseFloat(document.getElementById('totalMarketValue')?.textContent || '0');
-        const totalProfitV = window.parseFloat(document.getElementById('totalInventoryProfit')?.textContent || '0');
-        const totalAssetV = window.parseFloat(document.getElementById('totalAssetValue')?.textContent || '0');
+        // ── 2. 直接從庫存物件重新計算（不依賴 DOM 文字）────────────────
+        //      這樣即使股價更新後 DOM 尚未刷新，也能拿到最新數字
+        let totalCostV = 0;
+        let totalMarketV = 0;
+        inventory.forEach(item => {
+            totalCostV += item.totalCost || 0;
+            if (item.currentPrice > 0) {
+                const fee  = Math.max(Math.floor(item.currentPrice * item.shares * FEE_RATE * item.discountMultiplier), item.minFee);
+                const tax  = Math.floor(item.currentPrice * item.shares * item.taxRate);
+                const rev  = Math.floor(item.currentPrice * item.shares) - fee - tax;
+                totalMarketV += rev;
+            } else {
+                totalMarketV += item.totalCost || 0;   // 無現價時以成本代替
+            }
+        });
+        const cashBalance  = window.parseFloat(document.getElementById('cashInput')?.value || '0') || 0;
+        const totalProfitV = totalMarketV - totalCostV;
+        const totalAssetV  = totalMarketV + cashBalance;
 
+        // ── 3. 組成當日快照 ──────────────────────────────────────────────
         const currentStat = {
-            date: dateStr,
-            tsmcPrice: tsmcPrice,
-            totalCost: totalCostV,
+            date:        dateStr,
+            tsmcPrice:   tsmcPrice,
+            totalCost:   totalCostV,
             totalMarket: totalMarketV,
             totalProfit: totalProfitV,
-            totalAsset: totalAssetV,
-            profitDiff: 0
+            totalAsset:  totalAssetV,
+            profitDiff:  0
         };
 
+        // ── 4. 計算與前一筆的損益增減 ────────────────────────────────────
         const exIdx = dailyStats.findIndex(s => s.date === dateStr);
         let prevProfit = 0;
         if (exIdx > 0) {
@@ -3217,15 +3253,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (exIdx === -1 && dailyStats.length > 0) {
             prevProfit = dailyStats[dailyStats.length - 1].totalProfit || 0;
         }
-        
         currentStat.profitDiff = currentStat.totalProfit - prevProfit;
-        
+
+        // ── 5. 寫入（同一天覆蓋舊紀錄，不同天新增）──────────────────────
         if (exIdx >= 0) {
             dailyStats[exIdx] = currentStat;
         } else {
             dailyStats.push(currentStat);
         }
-        
+
         localStorage.setItem('twStockDailyStats', JSON.stringify(dailyStats));
         if (historyModal && historyModal.classList.contains('active')) renderHistoryTable();
     }
@@ -4426,6 +4462,1113 @@ document.addEventListener('DOMContentLoaded', () => {
 
     </script>
     <script>
+
+    // ============================================================
+    //  🎮 英文益智遊戲系統  (20 Games)
+    // ============================================================
+    (function() {
+        const tabGamesBtn      = document.getElementById('tabGamesBtn');
+        const tabFlashcardBtn2 = document.getElementById('tabFlashcardBtn');
+        const tabArticleBtn2   = document.getElementById('tabArticleBtn');
+        const flashcardSection2 = document.getElementById('flashcardSection');
+        const articleSection2   = document.getElementById('articleSection');
+        const gamesSection      = document.getElementById('gamesSection');
+        const gameMenuView      = document.getElementById('gameMenuView');
+        const gamePlayView      = document.getElementById('gamePlayView');
+        const gameContainer     = document.getElementById('gameContainer');
+        const currentGameTitle  = document.getElementById('currentGameTitle');
+        const gameScoreDisplay  = document.getElementById('gameScoreDisplay');
+        const backToGameMenuBtn = document.getElementById('backToGameMenuBtn');
+
+        if (!tabGamesBtn) return;
+
+        // ── Tab switching ────────────────────────────────────────
+        tabGamesBtn.addEventListener('click', () => {
+            tabGamesBtn.classList.add('active-tab');
+            tabFlashcardBtn2.classList.replace('primary-btn','secondary-btn');
+            tabArticleBtn2.classList.replace('primary-btn','secondary-btn');
+            tabFlashcardBtn2.classList.remove('active-tab');
+            tabArticleBtn2.classList.remove('active-tab');
+            flashcardSection2.style.display = 'none';
+            articleSection2.style.display   = 'none';
+            gamesSection.style.display      = 'flex';
+            renderGameMenu();
+        });
+
+        tabFlashcardBtn2.addEventListener('click', () => { tabGamesBtn.classList.remove('active-tab'); gamesSection.style.display='none'; });
+        tabArticleBtn2.addEventListener('click',   () => { tabGamesBtn.classList.remove('active-tab'); gamesSection.style.display='none'; });
+
+        backToGameMenuBtn.addEventListener('click', () => {
+            gamePlayView.style.display = 'none';
+            gameMenuView.style.display = 'block';
+            gameScoreDisplay.textContent = '';
+            currentGameTitle.textContent = '';
+        });
+
+        // ── Game definitions ─────────────────────────────────────
+        const GAMES = [
+            { id:'wordscramble', emoji:'🔀', name:'字母重組', desc:'重組打亂的字母，拼出正確單字', color:'rgba(59,130,246,0.3)', border:'#3b82f6' },
+            { id:'hangman',      emoji:'🪢', name:'猜單字',   desc:'一個字母一個字母猜出隱藏單字', color:'rgba(239,68,68,0.3)',   border:'#ef4444' },
+            { id:'wordmatch',    emoji:'🔗', name:'配對連連看',desc:'把英文單字和中文意思連起來',    color:'rgba(16,185,129,0.3)',  border:'#10b981' },
+            { id:'spellingbee',  emoji:'🐝', name:'拼字蜂',   desc:'聽發音，打出正確拼法',           color:'rgba(245,158,11,0.3)', border:'#f59e0b' },
+            { id:'wordchain',    emoji:'⛓️', name:'單字接龍', desc:'用前一個字的最後字母開始新單字',  color:'rgba(139,92,246,0.3)', border:'#8b5cf6' },
+            { id:'fillblank',    emoji:'📝', name:'填空測驗', desc:'根據中文提示填入正確英文單字',    color:'rgba(236,72,153,0.3)', border:'#ec4899' },
+            { id:'wordtyper',    emoji:'⌨️', name:'打字競速', desc:'限時內正確打出螢幕上的單字',      color:'rgba(20,184,166,0.3)', border:'#14b8a6' },
+            { id:'antonym',      emoji:'↔️', name:'反義詞挑戰',desc:'從選項中找出反義詞',            color:'rgba(251,146,60,0.3)', border:'#fb923c' },
+            { id:'synonym',      emoji:'🔄', name:'同義詞配對',desc:'從選項中找出同義詞',            color:'rgba(34,211,238,0.3)', border:'#22d3ee' },
+            { id:'wordsearch',   emoji:'🔍', name:'字母方陣', desc:'在字母格中找出隱藏的英文單字',   color:'rgba(163,230,53,0.3)', border:'#a3e635' },
+            { id:'categorize',   emoji:'🗂️', name:'單字分類', desc:'把單字拖進正確的分類欄位',       color:'rgba(192,132,252,0.3)',border:'#c084fc' },
+            { id:'memorygrid',   emoji:'🧠', name:'記憶翻牌', desc:'翻開配對英文和中文的卡片',       color:'rgba(251,191,36,0.3)', border:'#fbbf24' },
+            { id:'idiomguess',   emoji:'💬', name:'諺語猜謎', desc:'根據提示猜出英文諺語',           color:'rgba(52,211,153,0.3)', border:'#34d399' },
+            { id:'letterfall',   emoji:'🌧️', name:'字母雨',   desc:'接住掉落的字母組成單字',         color:'rgba(96,165,250,0.3)', border:'#60a5fa' },
+            { id:'wordwheel',    emoji:'🎡', name:'轉盤拼字', desc:'用轉盤中的字母組出最多單字',     color:'rgba(248,113,113,0.3)',border:'#f87171' },
+            { id:'crossword',    emoji:'✏️', name:'迷你填字', desc:'按線索填入交叉單字',            color:'rgba(167,139,250,0.3)',border:'#a78bfa' },
+            { id:'prefixsuffix', emoji:'🧩', name:'字根配對', desc:'拼出正確的字首 + 字根組合',     color:'rgba(110,231,183,0.3)',border:'#6ee7b7' },
+            { id:'truefalse',    emoji:'✅', name:'對錯判斷', desc:'判斷單字解釋是否正確',           color:'rgba(253,186,116,0.3)',border:'#fba164' },
+            { id:'sentencebuild',emoji:'🏗️', name:'句子重組', desc:'把打亂的字排列成正確句子',       color:'rgba(147,197,253,0.3)',border:'#93c5fd' },
+            { id:'wordladder',   emoji:'🪜', name:'單字梯',   desc:'每次改一個字母，從A單字爬到B單字', color:'rgba(240,171,252,0.3)',border:'#f0abfc' },
+        ];
+
+        function renderGameMenu() {
+            gameMenuView.style.display = 'block';
+            gamePlayView.style.display = 'none';
+            const grid = gameMenuView.querySelector('div');
+            grid.innerHTML = '';
+            GAMES.forEach(g => {
+                const btn = document.createElement('button');
+                btn.style.cssText = `background:${g.color}; border:1px solid ${g.border}; border-radius:14px; padding:14px 10px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s; font-family:inherit; color:#f8fafc; text-align:center;`;
+                btn.innerHTML = `<span style="font-size:28px;">${g.emoji}</span><span style="font-size:13px; font-weight:700;">${g.name}</span><span style="font-size:10px; color:rgba(255,255,255,0.6); line-height:1.3;">${g.desc}</span>`;
+                btn.onmouseover = () => { btn.style.transform='translateY(-3px)'; btn.style.boxShadow=`0 6px 20px ${g.color}`; };
+                btn.onmouseleave = () => { btn.style.transform=''; btn.style.boxShadow=''; };
+                btn.onclick = () => launchGame(g);
+                grid.appendChild(btn);
+            });
+        }
+
+        function launchGame(g) {
+            gameMenuView.style.display = 'none';
+            gamePlayView.style.display = 'flex';
+            currentGameTitle.textContent = `${g.emoji} ${g.name}`;
+            gameScoreDisplay.textContent = '';
+            gameContainer.innerHTML = '';
+            GAME_RUNNERS[g.id]();
+        }
+
+        function setScore(txt) { gameScoreDisplay.textContent = txt; }
+
+        // ── Word banks ───────────────────────────────────────────
+        const VOCAB = [
+            {en:'abundant',zh:'豐富的'}, {en:'barrier',zh:'障礙'}, {en:'capture',zh:'捕獲'},
+            {en:'decline',zh:'下降'}, {en:'emerge',zh:'出現'}, {en:'fragile',zh:'脆弱的'},
+            {en:'genuine',zh:'真實的'}, {en:'hesitate',zh:'猶豫'}, {en:'ignore',zh:'忽視'},
+            {en:'justify',zh:'辯護'}, {en:'keen',zh:'渴望的'}, {en:'linger',zh:'徘徊'},
+            {en:'migrate',zh:'遷移'}, {en:'notion',zh:'概念'}, {en:'obstacle',zh:'障礙物'},
+            {en:'persist',zh:'堅持'}, {en:'quest',zh:'追求'}, {en:'reveal',zh:'揭示'},
+            {en:'scarce',zh:'稀缺的'}, {en:'thrive',zh:'茁壯'}, {en:'unique',zh:'獨特的'},
+            {en:'vague',zh:'模糊的'}, {en:'wander',zh:'漫遊'}, {en:'yearn',zh:'渴望'},
+            {en:'abolish',zh:'廢除'}, {en:'blunt',zh:'直率的'}, {en:'conceal',zh:'隱藏'},
+            {en:'devote',zh:'奉獻'}, {en:'enhance',zh:'增強'}, {en:'flaw',zh:'缺陷'},
+        ];
+        const ANTONYMS = [
+            {word:'hot',ant:'cold'},{word:'fast',ant:'slow'},{word:'bright',ant:'dark'},
+            {word:'rich',ant:'poor'},{word:'happy',ant:'sad'},{word:'strong',ant:'weak'},
+            {word:'ancient',ant:'modern'},{word:'brave',ant:'cowardly'},{word:'expand',ant:'shrink'},
+            {word:'absorb',ant:'emit'},{word:'genuine',ant:'fake'},{word:'generous',ant:'stingy'},
+        ];
+        const SYNONYMS = [
+            {word:'happy',syn:'joyful'},{word:'fast',syn:'swift'},{word:'begin',syn:'start'},
+            {word:'angry',syn:'furious'},{word:'big',syn:'large'},{word:'smart',syn:'clever'},
+            {word:'tired',syn:'weary'},{word:'old',syn:'ancient'},{word:'strange',syn:'bizarre'},
+            {word:'brave',syn:'courageous'},{word:'quiet',syn:'silent'},{word:'shout',syn:'yell'},
+        ];
+        const SENTENCES = [
+            {words:['The','cat','sat','on','the','mat'], answer:'The cat sat on the mat'},
+            {words:['She','loves','to','read','books'], answer:'She loves to read books'},
+            {words:['He','runs','every','morning'], answer:'He runs every morning'},
+            {words:['They','went','to','the','park'], answer:'They went to the park'},
+            {words:['I','enjoy','learning','new','words'], answer:'I enjoy learning new words'},
+            {words:['The','sun','rises','in','the','east'], answer:'The sun rises in the east'},
+        ];
+        const IDIOMS = [
+            {hint:'行動勝於言語', idiom:'Actions speak louder than words'},
+            {hint:'種瓜得瓜，種豆得豆', idiom:'You reap what you sow'},
+            {hint:'不要以貌取人', idiom:'Never judge a book by its cover'},
+            {hint:'一石二鳥', idiom:'Kill two birds with one stone'},
+            {hint:'每朵烏雲都有銀邊', idiom:'Every cloud has a silver lining'},
+            {hint:'熟能生巧', idiom:'Practice makes perfect'},
+        ];
+        const PREFIXES = [
+            {prefix:'un', root:'happy', meaning:'不快樂的'},
+            {prefix:'re', root:'write', meaning:'重新寫'},
+            {prefix:'pre', root:'view', meaning:'預覽'},
+            {prefix:'dis', root:'agree', meaning:'不同意'},
+            {prefix:'mis', root:'understand', meaning:'誤解'},
+            {prefix:'over', root:'sleep', meaning:'睡過頭'},
+        ];
+        const CATEGORIES_DATA = [
+            {
+                cats: ['Animals 動物','Food 食物','Colors 顏色'],
+                words: [
+                    {w:'elephant',c:'Animals 動物'},{w:'pizza',c:'Food 食物'},{w:'blue',c:'Colors 顏色'},
+                    {w:'tiger',c:'Animals 動物'},{w:'sushi',c:'Food 食物'},{w:'crimson',c:'Colors 顏色'},
+                    {w:'dolphin',c:'Animals 動物'},{w:'pasta',c:'Food 食物'},{w:'violet',c:'Colors 顏色'},
+                ]
+            }
+        ];
+        const TRUEFALSE = [
+            {word:'benevolent', def:'kind and generous', correct:true},
+            {word:'melancholy', def:'extremely happy and joyful', correct:false},
+            {word:'verbose',    def:'using more words than necessary', correct:true},
+            {word:'nocturnal',  def:'active during the day', correct:false},
+            {word:'diligent',   def:'hard-working and careful', correct:true},
+            {word:'pessimist',  def:'someone who always expects the best', correct:false},
+            {word:'transparent',def:'easy to see through; obvious', correct:true},
+            {word:'ambiguous',  def:'having only one clear meaning', correct:false},
+        ];
+
+        function shuffle(arr) { return [...arr].sort(()=>Math.random()-0.5); }
+        function pick(arr, n=1) { const s=shuffle(arr); return n===1?s[0]:s.slice(0,n); }
+        function mkBtn(txt, style='', cls='') {
+            const b=document.createElement('button');
+            b.innerHTML=txt; b.style.cssText=style; b.className=cls; return b;
+        }
+        function gc(style='') { // game card wrapper
+            const d=document.createElement('div');
+            d.style.cssText=`background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:20px; ${style}`;
+            return d;
+        }
+        function feedback(msg, ok) {
+            const d=document.createElement('div');
+            d.style.cssText=`text-align:center; font-size:16px; font-weight:700; color:${ok?'#34d399':'#f87171'}; margin:10px 0; animation:fadeIn 0.3s;`;
+            d.textContent=msg; return d;
+        }
+
+        // ============================================================
+        //  GAME 1 – Word Scramble
+        // ============================================================
+        function game_wordscramble() {
+            let score=0, item, scrambled;
+            function next() {
+                item = pick(VOCAB);
+                scrambled = shuffle(item.en.split('')).join('');
+                while(scrambled===item.en && item.en.length>1) scrambled=shuffle(item.en.split('')).join('');
+                render();
+            }
+            function render() {
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:16px;align-items:center;');
+                card.innerHTML=`
+                    <p style="color:#94a3b8;font-size:13px;">重新排列字母，組成正確的英文單字</p>
+                    <div style="font-size:42px;font-weight:800;letter-spacing:8px;color:#c4b5fd;">${scrambled.toUpperCase()}</div>
+                    <div style="font-size:18px;color:#fbbf24;">中文：${item.zh}</div>
+                    <div style="display:flex;gap:8px;width:100%;max-width:300px;">
+                        <input id="scrambleInput" type="text" placeholder="輸入答案..." style="flex:1;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px;color:#fff;font-size:16px;font-family:inherit;outline:none;">
+                        <button id="scrambleSubmit" style="background:rgba(139,92,246,0.4);border:1px solid #8b5cf6;color:#fff;padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:700;">確認</button>
+                    </div>
+                    <div id="scrambleFeedback"></div>
+                    <button id="scrambleSkip" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:13px;">跳過</button>`;
+                gameContainer.appendChild(card);
+                const inp=card.querySelector('#scrambleInput');
+                const sub=card.querySelector('#scrambleSubmit');
+                const fb=card.querySelector('#scrambleFeedback');
+                function check() {
+                    if(inp.value.trim().toLowerCase()===item.en.toLowerCase()){
+                        score++; setScore(`✅ 分數：${score}`);
+                        fb.appendChild(feedback('🎉 正確！答案是 '+item.en, true));
+                        setTimeout(next,1200);
+                    } else {
+                        fb.appendChild(feedback('❌ 再試一次！', false));
+                        inp.value=''; inp.focus();
+                    }
+                }
+                sub.onclick=check;
+                inp.onkeydown=e=>{ if(e.key==='Enter') check(); };
+                card.querySelector('#scrambleSkip').onclick=()=>{ fb.appendChild(feedback('答案是：'+item.en, false)); setTimeout(next,1500); };
+                inp.focus();
+            }
+            next();
+        }
+
+        // ============================================================
+        //  GAME 2 – Hangman
+        // ============================================================
+        function game_hangman() {
+            let item, guessed, wrong, maxWrong=6, score=0;
+            const GALLOWS = ['','','','','','','😵'];
+            function next() {
+                item=pick(VOCAB); guessed=new Set(); wrong=0; render();
+            }
+            function render() {
+                const word=item.en.toLowerCase();
+                const display=word.split('').map(c=>guessed.has(c)?c:'_').join(' ');
+                const wrongLetters=[...guessed].filter(c=>!word.includes(c));
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:14px;align-items:center;');
+                const hangPct=Math.round((wrong/maxWrong)*100);
+                card.innerHTML=`
+                    <p style="color:#94a3b8;font-size:13px;">提示：${item.zh}</p>
+                    <div style="width:80px;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;">
+                        <div style="width:${hangPct}%;height:100%;background:${hangPct<50?'#34d399':'#f87171'};transition:width 0.3s;"></div>
+                    </div>
+                    <div style="font-size:34px;font-weight:800;letter-spacing:10px;color:#f8fafc;">${display}</div>
+                    <div style="color:#f87171;font-size:13px;">錯誤字母：${wrongLetters.join(' ') || '—'} (${wrong}/${maxWrong})</div>
+                    <div id="hangAlpha" style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;max-width:340px;"></div>
+                    <div id="hangFeedback"></div>`;
+                gameContainer.appendChild(card);
+                const alpha=card.querySelector('#hangAlpha');
+                'abcdefghijklmnopqrstuvwxyz'.split('').forEach(c=>{
+                    const b=mkBtn(c.toUpperCase());
+                    b.style.cssText=`width:32px;height:32px;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.07);color:#f8fafc;transition:all 0.15s;`;
+                    if(guessed.has(c)){ b.style.opacity='0.3'; b.disabled=true; b.style.background=word.includes(c)?'rgba(52,211,153,0.2)':'rgba(248,113,113,0.2)'; }
+                    b.onclick=()=>{
+                        guessed.add(c);
+                        if(!word.includes(c)) wrong++;
+                        const won=word.split('').every(l=>guessed.has(l));
+                        if(won){ score++; setScore(`✅ 分數：${score}`); card.querySelector('#hangFeedback').appendChild(feedback('🎉 答對了！',true)); setTimeout(next,1500); }
+                        else if(wrong>=maxWrong){ card.querySelector('#hangFeedback').appendChild(feedback('💀 答案是：'+item.en,false)); setTimeout(next,2000); }
+                        else render();
+                    };
+                    alpha.appendChild(b);
+                });
+            }
+            next();
+        }
+
+        // ============================================================
+        //  GAME 3 – Word Match (英中配對)
+        // ============================================================
+        function game_wordmatch() {
+            let score=0;
+            function next() {
+                const pairs=pick(VOCAB,6);
+                const enBtns=shuffle(pairs.map(p=>p.en));
+                const zhBtns=shuffle(pairs.map(p=>p.zh));
+                let selEn=null, selZh=null, matched=new Set();
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:12px;');
+                card.innerHTML=`<p style="color:#94a3b8;font-size:13px;text-align:center;">先點英文，再點對應的中文意思</p><div id="matchGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div><div id="matchFeedback"></div>`;
+                gameContainer.appendChild(card);
+                const grid=card.querySelector('#matchGrid');
+                function mkMatchBtn(txt, side) {
+                    const b=document.createElement('button');
+                    b.textContent=txt; b.dataset.val=txt; b.dataset.side=side;
+                    b.style.cssText=`padding:10px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:#f8fafc;transition:all 0.2s;`;
+                    b.onclick=()=>{
+                        if(matched.has(txt)) return;
+                        if(side==='en'){ if(selEn){ selEn.style.background='rgba(255,255,255,0.06)'; } selEn=b; b.style.background='rgba(139,92,246,0.4)'; }
+                        else { if(selZh){ selZh.style.background='rgba(255,255,255,0.06)'; } selZh=b; b.style.background='rgba(59,130,246,0.4)'; }
+                        if(selEn && selZh) {
+                            const pair=pairs.find(p=>p.en===selEn.dataset.val);
+                            if(pair && pair.zh===selZh.dataset.val){
+                                [selEn,selZh].forEach(x=>{ x.style.background='rgba(52,211,153,0.3)'; x.style.borderColor='#34d399'; x.disabled=true; matched.add(x.dataset.val); });
+                                score++;
+                                if(matched.size===pairs.length*2){ setScore(`✅ 分數：${score}`); card.querySelector('#matchFeedback').appendChild(feedback('🎉 全部配對成功！',true)); setTimeout(next,1500); }
+                            } else {
+                                [selEn,selZh].forEach(x=>{ x.style.background='rgba(248,113,113,0.3)'; });
+                                setTimeout(()=>{ if(selEn){selEn.style.background='rgba(255,255,255,0.06)';} if(selZh){selZh.style.background='rgba(255,255,255,0.06)';} selEn=null; selZh=null; },600);
+                                return;
+                            }
+                            selEn=null; selZh=null;
+                        }
+                    };
+                    return b;
+                }
+                enBtns.forEach(e=>grid.appendChild(mkMatchBtn(e,'en')));
+                zhBtns.forEach(z=>grid.appendChild(mkMatchBtn(z,'zh')));
+            }
+            next();
+        }
+
+        // ============================================================
+        //  GAME 4 – Spelling Bee (打出聽到的單字)
+        // ============================================================
+        function game_spellingbee() {
+            let score=0, item;
+            function speak(txt) {
+                const u=new SpeechSynthesisUtterance(txt);
+                u.lang='en-US'; u.rate=0.85; speechSynthesis.speak(u);
+            }
+            function next() { item=pick(VOCAB); render(); speak(item.en); }
+            function render() {
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:16px;align-items:center;');
+                card.innerHTML=`
+                    <p style="color:#94a3b8;font-size:13px;">聽發音，打出正確的英文拼字</p>
+                    <p style="font-size:18px;color:#fbbf24;">中文提示：${item.zh}</p>
+                    <button id="beePlay" style="font-size:28px;background:rgba(245,158,11,0.2);border:1px solid #f59e0b;border-radius:50%;width:60px;height:60px;cursor:pointer;">🔊</button>
+                    <div style="display:flex;gap:8px;width:100%;max-width:300px;">
+                        <input id="beeInput" type="text" placeholder="打出你聽到的單字..." style="flex:1;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px;color:#fff;font-size:16px;font-family:inherit;outline:none;">
+                        <button id="beeSubmit" style="background:rgba(245,158,11,0.4);border:1px solid #f59e0b;color:#fff;padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:700;">確認</button>
+                    </div>
+                    <div id="beeFeedback"></div>`;
+                gameContainer.appendChild(card);
+                card.querySelector('#beePlay').onclick=()=>speak(item.en);
+                const inp=card.querySelector('#beeInput');
+                function check() {
+                    const fb=card.querySelector('#beeFeedback');
+                    if(inp.value.trim().toLowerCase()===item.en.toLowerCase()){
+                        score++; setScore(`✅ 分數：${score}`);
+                        fb.appendChild(feedback('🎉 正確！',true)); setTimeout(next,1200);
+                    } else {
+                        fb.appendChild(feedback(`❌ 答案是：${item.en}`,false)); setTimeout(next,2000);
+                    }
+                }
+                card.querySelector('#beeSubmit').onclick=check;
+                inp.onkeydown=e=>{ if(e.key==='Enter') check(); };
+                inp.focus();
+            }
+            next();
+        }
+
+        // ============================================================
+        //  GAME 5 – Fill in the Blank
+        // ============================================================
+        function game_fillblank() {
+            let score=0, wrong=0;
+            const pool=shuffle(VOCAB);
+            let idx=0;
+            function next() {
+                if(idx>=pool.length){ gameContainer.innerHTML=''; gameContainer.appendChild(gc('text-align:center;')).innerHTML=`<p style="color:#34d399;font-size:24px;font-weight:800;">🏆 完成！${score}/${pool.length}</p>`; return; }
+                const item=pool[idx++];
+                const opts=shuffle([item, ...pick(VOCAB.filter(v=>v.en!==item.en),3)]).map(v=>v.en);
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:14px;align-items:center;');
+                card.innerHTML=`
+                    <p style="color:#94a3b8;font-size:13px;">選出符合中文意思的英文單字</p>
+                    <div style="font-size:26px;font-weight:800;color:#fbbf24;">${item.zh}</div>
+                    <div id="fillOpts" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:360px;"></div>
+                    <div id="fillFeedback"></div>`;
+                gameContainer.appendChild(card);
+                const optsDiv=card.querySelector('#fillOpts');
+                opts.forEach(o=>{
+                    const b=mkBtn(o);
+                    b.style.cssText=`padding:12px;border-radius:10px;cursor:pointer;font-size:16px;font-weight:700;font-family:inherit;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#f8fafc;transition:all 0.2s;`;
+                    b.onclick=()=>{
+                        optsDiv.querySelectorAll('button').forEach(x=>x.disabled=true);
+                        if(o===item.en){ score++; setScore(`✅ ${score}/${pool.length}`); b.style.background='rgba(52,211,153,0.3)'; b.style.borderColor='#34d399'; setTimeout(next,900); }
+                        else { wrong++; b.style.background='rgba(248,113,113,0.3)'; b.style.borderColor='#f87171'; optsDiv.querySelectorAll('button').forEach(x=>{ if(x.textContent===item.en){x.style.background='rgba(52,211,153,0.2)';} }); setTimeout(next,1500); }
+                    };
+                    optsDiv.appendChild(b);
+                });
+            }
+            next();
+        }
+
+        // ============================================================
+        //  GAME 6 – Word Typer (計時打字)
+        // ============================================================
+        function game_wordtyper() {
+            let score=0, timeLeft=30, timer, items=shuffle(VOCAB), idx=0, active=false;
+            function start() {
+                active=true; score=0; idx=0; timeLeft=30; items=shuffle(VOCAB);
+                timer=setInterval(()=>{ timeLeft--; update(); if(timeLeft<=0){ clearInterval(timer); end(); } },1000);
+                render();
+            }
+            function end() {
+                active=false;
+                gameContainer.innerHTML='';
+                const card=gc('text-align:center;display:flex;flex-direction:column;gap:16px;align-items:center;');
+                card.innerHTML=`<div style="font-size:48px;">⏱️</div><div style="font-size:24px;font-weight:800;color:#fbbf24;">時間到！得分：${score}</div><p style="color:#94a3b8;">30秒內打出 ${score} 個單字</p>`;
+                const rb=mkBtn('再玩一次','background:rgba(59,130,246,0.3);border:1px solid #3b82f6;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-weight:700;');
+                rb.onclick=start; card.appendChild(rb); gameContainer.appendChild(card);
+            }
+            function update() {
+                const tEl=document.getElementById('typerTime');
+                if(tEl) tEl.textContent=`⏱️ ${timeLeft}s`;
+            }
+            function render() {
+                const item=items[idx % items.length];
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:16px;align-items:center;');
+                card.innerHTML=`
+                    <div style="display:flex;justify-content:space-between;width:100%;font-size:14px;color:#94a3b8;">
+                        <span id="typerTime">⏱️ ${timeLeft}s</span><span>✅ ${score} 個</span>
+                    </div>
+                    <p style="color:#94a3b8;font-size:13px;">快速打出以下單字！</p>
+                    <div style="font-size:38px;font-weight:800;color:#c4b5fd;">${item.en}</div>
+                    <div style="font-size:16px;color:#fbbf24;">${item.zh}</div>
+                    <input id="typerInput" type="text" autocomplete="off" autocorrect="off" spellcheck="false" style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px;color:#fff;font-size:18px;font-family:inherit;outline:none;text-align:center;width:100%;max-width:280px;">`;
+                gameContainer.appendChild(card);
+                const inp=card.querySelector('#typerInput');
+                inp.focus();
+                inp.oninput=()=>{
+                    if(inp.value.toLowerCase()===item.en.toLowerCase()){
+                        score++; idx++; inp.value=''; render(); update();
+                    }
+                };
+            }
+            // Start screen
+            gameContainer.innerHTML='';
+            const card=gc('text-align:center;display:flex;flex-direction:column;gap:16px;align-items:center;');
+            card.innerHTML=`<div style="font-size:48px;">⌨️</div><p style="color:#f8fafc;font-size:18px;font-weight:700;">30秒打字競速</p><p style="color:#94a3b8;">快速正確打出螢幕上的英文單字</p>`;
+            const sb=mkBtn('開始！','background:rgba(139,92,246,0.4);border:1px solid #8b5cf6;color:#fff;padding:12px 32px;border-radius:12px;cursor:pointer;font-size:18px;font-weight:800;');
+            sb.onclick=start; card.appendChild(sb); gameContainer.appendChild(card);
+        }
+
+        // ============================================================
+        //  GAME 7 – Antonym Challenge
+        // ============================================================
+        function game_antonym() {
+            let score=0, q=0;
+            const pool=shuffle(ANTONYMS);
+            function next() {
+                if(q>=pool.length){ done(score,pool.length); return; }
+                const item=pool[q++];
+                const wrongs=ANTONYMS.filter(x=>x.ant!==item.ant).map(x=>x.ant);
+                const opts=shuffle([item.ant, ...pick(wrongs,3)]);
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:14px;align-items:center;');
+                card.innerHTML=`
+                    <p style="color:#94a3b8;font-size:13px;">找出反義詞</p>
+                    <div style="font-size:36px;font-weight:800;color:#60a5fa;">${item.word}</div>
+                    <div id="antOpts" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:320px;"></div>
+                    <div id="antFeedback"></div>`;
+                gameContainer.appendChild(card);
+                const optsDiv=card.querySelector('#antOpts');
+                opts.forEach(o=>{
+                    const b=mkBtn(o);
+                    b.style.cssText=`padding:12px;border-radius:10px;cursor:pointer;font-size:16px;font-weight:700;font-family:inherit;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#f8fafc;transition:all 0.2s;`;
+                    b.onclick=()=>{
+                        optsDiv.querySelectorAll('button').forEach(x=>x.disabled=true);
+                        const fb=card.querySelector('#antFeedback');
+                        if(o===item.ant){ score++; setScore(`✅ ${score}/${pool.length}`); b.style.background='rgba(52,211,153,0.3)'; b.style.borderColor='#34d399'; fb.appendChild(feedback('🎉 正確！',true)); setTimeout(next,900); }
+                        else { b.style.background='rgba(248,113,113,0.3)'; optsDiv.querySelectorAll('button').forEach(x=>{ if(x.textContent===item.ant) x.style.background='rgba(52,211,153,0.2)'; }); fb.appendChild(feedback(`正確答案：${item.ant}`,false)); setTimeout(next,1600); }
+                    };
+                    optsDiv.appendChild(b);
+                });
+            }
+            next();
+        }
+
+        // ============================================================
+        //  GAME 8 – Synonym Quiz
+        // ============================================================
+        function game_synonym() {
+            let score=0, q=0;
+            const pool=shuffle(SYNONYMS);
+            function next() {
+                if(q>=pool.length){ done(score,pool.length); return; }
+                const item=pool[q++];
+                const wrongs=SYNONYMS.filter(x=>x.syn!==item.syn).map(x=>x.syn);
+                const opts=shuffle([item.syn, ...pick(wrongs,3)]);
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:14px;align-items:center;');
+                card.innerHTML=`
+                    <p style="color:#94a3b8;font-size:13px;">找出同義詞</p>
+                    <div style="font-size:36px;font-weight:800;color:#34d399;">${item.word}</div>
+                    <div id="synOpts" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:320px;"></div>
+                    <div id="synFeedback"></div>`;
+                gameContainer.appendChild(card);
+                const optsDiv=card.querySelector('#synOpts');
+                opts.forEach(o=>{
+                    const b=mkBtn(o);
+                    b.style.cssText=`padding:12px;border-radius:10px;cursor:pointer;font-size:16px;font-weight:700;font-family:inherit;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#f8fafc;transition:all 0.2s;`;
+                    b.onclick=()=>{
+                        optsDiv.querySelectorAll('button').forEach(x=>x.disabled=true);
+                        const fb=card.querySelector('#synFeedback');
+                        if(o===item.syn){ score++; setScore(`✅ ${score}/${pool.length}`); b.style.background='rgba(52,211,153,0.3)'; b.style.borderColor='#34d399'; fb.appendChild(feedback('🎉 正確！',true)); setTimeout(next,900); }
+                        else { b.style.background='rgba(248,113,113,0.3)'; optsDiv.querySelectorAll('button').forEach(x=>{ if(x.textContent===item.syn) x.style.background='rgba(52,211,153,0.2)'; }); fb.appendChild(feedback(`正確答案：${item.syn}`,false)); setTimeout(next,1600); }
+                    };
+                    optsDiv.appendChild(b);
+                });
+            }
+            next();
+        }
+
+        // ============================================================
+        //  GAME 9 – Word Search (字母方陣)
+        // ============================================================
+        function game_wordsearch() {
+            const SIZE=10;
+            const wordsToFind=['cat','dog','run','jump','play','read','book','blue','fast','kind'];
+            let grid=[], placed=[], found=new Set(), selecting=false, selStart=null, selCells=[];
+            function buildGrid() {
+                grid=Array.from({length:SIZE},()=>Array(SIZE).fill(''));
+                placed=[];
+                const dirs=[[0,1],[1,0],[1,1],[-1,1]];
+                wordsToFind.forEach(word=>{
+                    let ok=false;
+                    for(let t=0;t<200&&!ok;t++){
+                        const dir=dirs[Math.floor(Math.random()*dirs.length)];
+                        const r=Math.floor(Math.random()*SIZE);
+                        const c=Math.floor(Math.random()*SIZE);
+                        let cells=[];
+                        let valid=true;
+                        for(let i=0;i<word.length;i++){
+                            const nr=r+dir[0]*i, nc=c+dir[1]*i;
+                            if(nr<0||nr>=SIZE||nc<0||nc>=SIZE){ valid=false; break; }
+                            if(grid[nr][nc]!==''&&grid[nr][nc]!==word[i]){ valid=false; break; }
+                            cells.push([nr,nc]);
+                        }
+                        if(valid){ cells.forEach(([nr,nc],i)=>grid[nr][nc]=word[i]); placed.push({word,cells}); ok=true; }
+                    }
+                });
+                for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) if(!grid[r][c]) grid[r][c]='abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random()*26)];
+            }
+            function render() {
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:12px;');
+                const wordsDiv=document.createElement('div');
+                wordsDiv.style.cssText='display:flex;flex-wrap:wrap;gap:6px;justify-content:center;';
+                wordsToFind.forEach(w=>{ const s=document.createElement('span'); s.style.cssText=`padding:3px 10px;border-radius:20px;font-size:13px;font-weight:600;${found.has(w)?'background:rgba(52,211,153,0.3);color:#34d399;text-decoration:line-through;':'background:rgba(255,255,255,0.08);color:#f8fafc;'}`; s.textContent=w; wordsDiv.appendChild(s); });
+                card.appendChild(wordsDiv);
+                const table=document.createElement('div');
+                table.style.cssText='display:grid;gap:2px;user-select:none;justify-content:center;';
+                table.style.gridTemplateColumns=`repeat(${SIZE},30px)`;
+                const cells=[];
+                for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
+                    const cell=document.createElement('div');
+                    cell.style.cssText='width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border-radius:4px;cursor:pointer;background:rgba(255,255,255,0.05);color:#f8fafc;transition:background 0.1s;';
+                    cell.textContent=grid[r][c].toUpperCase();
+                    cell.dataset.r=r; cell.dataset.c=c;
+                    // Check if already found
+                    const inFound=placed.filter(p=>found.has(p.word)).flatMap(p=>p.cells);
+                    if(inFound.some(([fr,fc])=>fr===r&&fc===c)) cell.style.background='rgba(52,211,153,0.3)';
+                    cell.onmousedown=()=>{ selecting=true; selStart=[r,c]; selCells=[[r,c]]; cell.style.background='rgba(139,92,246,0.5)'; };
+                    cell.onmouseover=()=>{ if(!selecting) return; cells.forEach(cl=>{ if(!placed.filter(p=>found.has(p.word)).flatMap(p=>p.cells).some(([fr,fc])=>fr===+cl.dataset.r&&fc===+cl.dataset.c)) cl.style.background='rgba(255,255,255,0.05)'; }); const pr=+selStart[0],pc=+selStart[1]; let dr=r-pr,dc=c-pc; const len=Math.max(Math.abs(dr),Math.abs(dc)); if(len>0){dr=Math.sign(dr);dc=Math.sign(dc);} selCells=[]; for(let i=0;i<=len;i++){ const nr=pr+dr*i,nc=pc+dc*i; if(nr>=0&&nr<SIZE&&nc>=0&&nc<SIZE){ selCells.push([nr,nc]); cells[nr*SIZE+nc].style.background='rgba(139,92,246,0.5)'; } } };
+                    cell.onmouseup=()=>{ if(!selecting) return; selecting=false; const selStr=selCells.map(([r,c])=>grid[r][c]).join(''); const selStrRev=selStr.split('').reverse().join(''); const match=placed.find(p=>p.word===selStr||p.word===selStrRev); if(match&&!found.has(match.word)){ found.add(match.word); if(found.size===wordsToFind.length){ setTimeout(()=>{ gameContainer.innerHTML=''; gameContainer.appendChild(gc('text-align:center;')).innerHTML='<p style="color:#34d399;font-size:24px;font-weight:800;">🎉 全部找到了！</p>'; },500); } } render(); };
+                    cells.push(cell);
+                    table.appendChild(cell);
+                }
+                document.onmouseup=()=>{ selecting=false; };
+                card.appendChild(table);
+                setScore(`🔍 找到 ${found.size}/${wordsToFind.length}`);
+                gameContainer.appendChild(card);
+            }
+            buildGrid(); render();
+        }
+
+        // ============================================================
+        //  GAME 10 – Categorize
+        // ============================================================
+        function game_categorize() {
+            let score=0;
+            const data=CATEGORIES_DATA[0];
+            let remaining=[...shuffle(data.words)], placed={};
+            data.cats.forEach(c=>placed[c]=[]);
+            function render() {
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:14px;');
+                const catsDiv=document.createElement('div');
+                catsDiv.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:10px;';
+                data.cats.forEach(cat=>{
+                    const col=document.createElement('div');
+                    col.style.cssText='background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px;min-height:100px;';
+                    col.innerHTML=`<div style="font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:8px;text-align:center;">${cat}</div>`;
+                    placed[cat].forEach(w=>{ const s=document.createElement('div'); s.textContent=w; s.style.cssText='background:rgba(52,211,153,0.2);border-radius:6px;padding:4px 8px;font-size:13px;color:#34d399;margin:3px 0;text-align:center;'; col.appendChild(s); });
+                    catsDiv.appendChild(col);
+                });
+                card.appendChild(catsDiv);
+                if(remaining.length>0){
+                    const curr=remaining[0];
+                    const wordDiv=document.createElement('div');
+                    wordDiv.style.cssText='text-align:center;padding:16px;';
+                    wordDiv.innerHTML=`<p style="color:#94a3b8;font-size:13px;margin-bottom:8px;">把這個單字放入正確的類別</p><div style="font-size:28px;font-weight:800;color:#f8fafc;">${curr.w}</div>`;
+                    card.appendChild(wordDiv);
+                    const btns=document.createElement('div');
+                    btns.style.cssText='display:flex;gap:8px;flex-wrap:wrap;justify-content:center;';
+                    data.cats.forEach(cat=>{
+                        const b=mkBtn(cat,'','');
+                        b.style.cssText='padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.07);color:#f8fafc;';
+                        b.onclick=()=>{
+                            remaining.shift();
+                            if(cat===curr.c){ placed[cat].push(curr.w); score++; setScore(`✅ ${score}`); }
+                            else { setScore(`❌ 正確分類：${curr.c}`); }
+                            if(remaining.length===0){ setTimeout(()=>{ done(score,data.words.length); },500); }
+                            else render();
+                        };
+                        btns.appendChild(b);
+                    });
+                    card.appendChild(btns);
+                } else { done(score,data.words.length); return; }
+                gameContainer.appendChild(card);
+            }
+            render();
+        }
+
+        // ============================================================
+        //  GAME 11 – Memory Grid (翻牌配對)
+        // ============================================================
+        function game_memorygrid() {
+            const pairs=pick(VOCAB,6);
+            const cards=shuffle([...pairs.map(p=>({id:p.en,txt:p.en,type:'en'})),...pairs.map(p=>({id:p.en,txt:p.zh,type:'zh'}))]);
+            let flipped=[], matched=new Set(), moves=0;
+            function render() {
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:12px;');
+                card.innerHTML=`<p style="color:#94a3b8;font-size:13px;text-align:center;">翻開英文和對應中文的配對 (${moves} 步)</p>`;
+                const grid=document.createElement('div');
+                grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:8px;';
+                cards.forEach((c,i)=>{
+                    const cell=document.createElement('div');
+                    const isFlipped=flipped.includes(i)||matched.has(c.id);
+                    cell.style.cssText=`height:60px;border-radius:10px;cursor:${matched.has(c.id)||flipped.includes(i)?'default':'pointer'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;text-align:center;padding:4px;transition:all 0.3s;${matched.has(c.id)?'background:rgba(52,211,153,0.3);border:1px solid #34d399;color:#34d399;':isFlipped?'background:rgba(139,92,246,0.3);border:1px solid #8b5cf6;color:#f8fafc;':'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:transparent;'}`;
+                    cell.textContent=isFlipped?c.txt:'?';
+                    if(!matched.has(c.id)&&!flipped.includes(i)){
+                        cell.onclick=()=>{
+                            if(flipped.length>=2) return;
+                            flipped.push(i); moves++;
+                            if(flipped.length===2){
+                                const [a,b]=flipped;
+                                if(cards[a].id===cards[b].id&&a!==b){ matched.add(cards[a].id); flipped=[]; if(matched.size===pairs.length){ setTimeout(()=>done(pairs.length,pairs.length),500); } }
+                                else { setTimeout(()=>{ flipped=[]; render(); },900); }
+                            }
+                            render();
+                        };
+                    }
+                    grid.appendChild(cell);
+                });
+                card.appendChild(grid);
+                setScore(`🧠 配對 ${matched.size}/${pairs.length}`);
+                gameContainer.appendChild(card);
+            }
+            render();
+        }
+
+        // ============================================================
+        //  GAME 12 – Idiom Guess
+        // ============================================================
+        function game_idiomguess() {
+            let score=0, q=0;
+            const pool=shuffle(IDIOMS);
+            function next() {
+                if(q>=pool.length){ done(score,pool.length); return; }
+                const item=pool[q++];
+                // Blank out one word
+                const words=item.idiom.split(' ');
+                const blankIdx=Math.floor(Math.random()*words.length);
+                const answer=words[blankIdx].replace(/[^a-zA-Z]/g,'');
+                const displayed=words.map((w,i)=>i===blankIdx?'___':w).join(' ');
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:16px;align-items:center;');
+                card.innerHTML=`
+                    <p style="color:#94a3b8;font-size:13px;">根據中文提示和語境，填入缺失的單字</p>
+                    <div style="font-size:18px;color:#fbbf24;">💡 ${item.hint}</div>
+                    <div style="font-size:18px;font-weight:600;color:#f8fafc;text-align:center;">${displayed}</div>
+                    <div style="display:flex;gap:8px;width:100%;max-width:280px;">
+                        <input id="idiomInput" type="text" placeholder="填入缺少的單字..." style="flex:1;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px;color:#fff;font-size:16px;font-family:inherit;outline:none;">
+                        <button id="idiomSubmit" style="background:rgba(52,211,153,0.3);border:1px solid #34d399;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700;">✓</button>
+                    </div>
+                    <div id="idiomFeedback"></div>`;
+                gameContainer.appendChild(card);
+                const inp=card.querySelector('#idiomInput');
+                function check() {
+                    const fb=card.querySelector('#idiomFeedback');
+                    if(inp.value.trim().toLowerCase()===answer.toLowerCase()){ score++; setScore(`✅ ${score}/${pool.length}`); fb.appendChild(feedback('🎉 正確！完整句：'+item.idiom,true)); setTimeout(next,2000); }
+                    else { fb.appendChild(feedback(`❌ 答案是：${answer}`,false)); setTimeout(next,2000); }
+                }
+                card.querySelector('#idiomSubmit').onclick=check;
+                inp.onkeydown=e=>{ if(e.key==='Enter') check(); };
+                inp.focus();
+            }
+            next();
+        }
+
+        // ============================================================
+        //  GAME 13 – Letter Fall (字母雨)
+        // ============================================================
+        function game_letterfall() {
+            let target, typed='', score=0, lives=3, speed=3000, interval, gameOver=false;
+            function next() {
+                target=pick(VOCAB); typed='';
+                render();
+                clearTimeout(interval);
+                interval=setTimeout(()=>{ if(!gameOver){ lives--; if(lives<=0) end(); else next(); } },speed);
+            }
+            function end() {
+                gameOver=true; clearTimeout(interval);
+                gameContainer.innerHTML='';
+                const card=gc('text-align:center;display:flex;flex-direction:column;gap:16px;align-items:center;');
+                card.innerHTML=`<div style="font-size:48px;">💀</div><div style="font-size:24px;font-weight:800;color:#f87171;">遊戲結束！得分：${score}</div>`;
+                const rb=mkBtn('再玩一次','background:rgba(59,130,246,0.3);border:1px solid #3b82f6;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-weight:700;');
+                rb.onclick=()=>{ gameOver=false; score=0; lives=3; speed=3000; next(); };
+                card.appendChild(rb); gameContainer.appendChild(card);
+            }
+            function render() {
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:14px;align-items:center;position:relative;min-height:280px;');
+                const pct=Math.max(0,(speed-typed.length/target.en.length*speed)/speed*100);
+                card.innerHTML=`
+                    <div style="display:flex;justify-content:space-between;width:100%;font-size:14px;"><span>❤️ ${'♥'.repeat(lives)}</span><span>✅ ${score}</span></div>
+                    <div style="width:100%;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;"><div id="fallBar" style="height:100%;background:#f87171;border-radius:3px;transition:width 0.1s;" ></div></div>
+                    <p style="color:#94a3b8;font-size:13px;">快速打出這個單字！（${target.zh}）</p>
+                    <div style="font-size:40px;font-weight:800;color:#c4b5fd;">${target.en}</div>
+                    <div style="font-size:24px;letter-spacing:4px;color:#f8fafc;">${typed}<span style="opacity:0.3">${target.en.slice(typed.length)}</span></div>`;
+                document.onkeydown=ev=>{ if(gameOver||document.activeElement.tagName==='INPUT') return; const k=ev.key; if(k.length===1&&k.match(/[a-z]/i)){ const next_char=target.en[typed.length]; if(k.toLowerCase()===next_char){ typed+=k; if(typed===target.en){ score++; speed=Math.max(1000,speed-100); clearTimeout(interval); next(); return; } render(); } } };
+                gameContainer.appendChild(card);
+            }
+            next();
+        }
+
+        // ============================================================
+        //  GAME 14 – Word Wheel
+        // ============================================================
+        function game_wordwheel() {
+            const CENTER='s';
+            const LETTERS='t,r,a,e,i,n,g,o'.split(',');
+            const ALL_LETTERS=[CENTER,...LETTERS];
+            // Pre-known valid words for these letters
+            const VALID=['star','rain','sing','ring','earn','grin','gain','train','groan','stair','grains','reign','string','strain','strange','ingot','tore','store','snore','stone','noter','tenor'];
+            let found=new Set(), current='';
+            function isValid(w) { if(w.length<3||!w.includes(CENTER)) return false; const avail=[...ALL_LETTERS]; for(const c of w){ const i=avail.indexOf(c); if(i<0) return false; avail.splice(i,1); } return VALID.includes(w.toLowerCase()); }
+            function render() {
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:14px;align-items:center;');
+                card.innerHTML=`
+                    <p style="color:#94a3b8;font-size:13px;">用這些字母組出英文單字（必須包含中間字母 <b style="color:#fbbf24">${CENTER.toUpperCase()}</b>，最少3個字母）</p>
+                    <div id="currentWord" style="font-size:28px;font-weight:800;letter-spacing:4px;color:#c4b5fd;min-height:40px;">${current.toUpperCase() || '...'}</div>
+                    <div style="position:relative;width:180px;height:180px;">
+                        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;background:rgba(245,158,11,0.4);border:2px solid #f59e0b;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;cursor:pointer;" onclick="wheelClick('${CENTER}')">${CENTER.toUpperCase()}</div>
+                        ${LETTERS.map((l,i)=>{ const angle=(i/LETTERS.length)*2*Math.PI-Math.PI/2; const x=90+72*Math.cos(angle)-24; const y=90+72*Math.sin(angle)-24; return `<div style="position:absolute;left:${x}px;top:${y}px;width:48px;height:48px;background:rgba(139,92,246,0.3);border:1px solid #8b5cf6;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;cursor:pointer;" onclick="wheelClick('${l}')">${l.toUpperCase()}</div>`; }).join('')}
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="wheelSubmit()" style="background:rgba(52,211,153,0.3);border:1px solid #34d399;color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:700;">確認</button>
+                        <button onclick="wheelClear()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;padding:8px 16px;border-radius:8px;cursor:pointer;">清除</button>
+                    </div>
+                    <div id="wheelFound" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:320px;"></div>
+                    <div id="wheelFeedback"></div>`;
+                const foundDiv=card.querySelector('#wheelFound');
+                [...found].forEach(w=>{ const s=document.createElement('span'); s.textContent=w; s.style.cssText='background:rgba(52,211,153,0.2);color:#34d399;padding:3px 10px;border-radius:20px;font-size:13px;'; foundDiv.appendChild(s); });
+                setScore(`✅ 找到 ${found.size} 個單字`);
+                gameContainer.appendChild(card);
+            }
+            window.wheelClick=(l)=>{ current+=l; document.getElementById('currentWord').textContent=current.toUpperCase(); };
+            window.wheelSubmit=()=>{
+                const fb=document.getElementById('wheelFeedback');
+                if(found.has(current.toLowerCase())){ fb.innerHTML='<span style="color:#fbbf24">已找過這個！</span>'; }
+                else if(isValid(current.toLowerCase())){ found.add(current.toLowerCase()); current=''; render(); }
+                else { fb.innerHTML='<span style="color:#f87171">不是有效單字或不包含中間字母</span>'; setTimeout(()=>{ if(fb) fb.innerHTML=''; },1000); current=''; document.getElementById('currentWord').textContent='...'; }
+            };
+            window.wheelClear=()=>{ current=''; document.getElementById('currentWord').textContent='...'; };
+            render();
+        }
+
+        // ============================================================
+        //  GAME 15 – Mini Crossword (迷你填字)
+        // ============================================================
+        function game_crossword() {
+            // Simple 5x5 crossword
+            const puzzle = {
+                grid: [
+                    ['C','A','T','.','.'],
+                    ['.','.','A','.','D'],
+                    ['.','.','P','.','O'],
+                    ['.','.','.','.','.'],
+                    ['D','O','G','.','G'],
+                ],
+                clues: {
+                    across: [{num:1,r:0,c:0,len:3,ans:'cat',clue:'家貓'},{num:5,r:4,c:0,len:3,ans:'dog',clue:'狗'}],
+                    down:   [{num:1,r:0,c:2,len:3,ans:'tap',clue:'輕拍'},{num:2,r:1,c:4,len:3,ans:'dog',clue:'狗'}]
+                }
+            };
+            const answers={};
+            const SIZE=5;
+            let solved=0, total=puzzle.clues.across.length+puzzle.clues.down.length;
+            gameContainer.innerHTML='';
+            const card=gc('display:flex;flex-direction:column;gap:14px;');
+            const gridDiv=document.createElement('div');
+            gridDiv.style.cssText=`display:grid;grid-template-columns:repeat(${SIZE},36px);gap:2px;justify-content:center;`;
+            const cells=[];
+            for(let r=0;r<SIZE;r++){
+                cells[r]=[];
+                for(let c=0;c<SIZE;c++){
+                    const cell=document.createElement('div');
+                    if(puzzle.grid[r][c]==='.'){
+                        cell.style.cssText='width:36px;height:36px;background:rgba(0,0,0,0.4);border-radius:4px;';
+                    } else {
+                        const inp=document.createElement('input');
+                        inp.maxLength=1; inp.style.cssText='width:36px;height:36px;text-align:center;font-size:16px;font-weight:800;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#f8fafc;outline:none;font-family:inherit;';
+                        inp.oninput=()=>{ inp.value=inp.value.toUpperCase(); checkAll(); };
+                        cell.appendChild(inp);
+                    }
+                    cells[r][c]=cell;
+                    gridDiv.appendChild(cell);
+                }
+            }
+            card.appendChild(gridDiv);
+            const cluesDiv=document.createElement('div');
+            cluesDiv.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;';
+            cluesDiv.innerHTML=`<div><b style="color:#60a5fa">橫向</b><br>${puzzle.clues.across.map(cl=>`${cl.num}. ${cl.clue}`).join('<br>')}</div><div><b style="color:#34d399">直向</b><br>${puzzle.clues.down.map(cl=>`${cl.num}. ${cl.clue}`).join('<br>')}</div>`;
+            card.appendChild(cluesDiv);
+            const fb=document.createElement('div'); fb.style.cssText='text-align:center;font-size:14px;color:#fbbf24;';
+            card.appendChild(fb);
+            function checkAll() {
+                let allCorrect=true;
+                [...puzzle.clues.across,...puzzle.clues.down].forEach(cl=>{
+                    for(let i=0;i<cl.len;i++){
+                        const r=cl.r+(cl===puzzle.clues.across[0]||cl===puzzle.clues.across[1]?0:i);
+                        const c=cl.c+(cl===puzzle.clues.across[0]||cl===puzzle.clues.across[1]?i:0);
+                        const inp=cells[r]?.[c]?.querySelector('input');
+                        if(!inp||inp.value.toUpperCase()!==cl.ans[i].toUpperCase()) allCorrect=false;
+                    }
+                });
+                if(allCorrect){ fb.textContent='🎉 填字完成！'; setScore('🏆 完成！'); }
+            }
+            gameContainer.appendChild(card);
+        }
+
+        // ============================================================
+        //  GAME 16 – Prefix / Suffix
+        // ============================================================
+        function game_prefixsuffix() {
+            let score=0, q=0;
+            const pool=shuffle(PREFIXES);
+            function next() {
+                if(q>=pool.length){ done(score,pool.length); return; }
+                const item=pool[q++];
+                const wrong=[pick(PREFIXES.filter(p=>p.prefix!==item.prefix&&p.root!==item.root)).prefix, pick(PREFIXES.filter(p=>p.root!==item.root)).root];
+                const opts=shuffle([item.prefix, ...['re','un','dis','pre','mis','over'].filter(p=>p!==item.prefix).slice(0,3)]);
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:16px;align-items:center;');
+                card.innerHTML=`
+                    <p style="color:#94a3b8;font-size:13px;">選出正確的字首（prefix），組成意思符合的單字</p>
+                    <div style="display:flex;align-items:center;gap:0;font-size:32px;font-weight:800;">
+                        <span id="pfxSelected" style="color:#fbbf24;min-width:80px;text-align:right;">???</span>
+                        <span style="color:#f8fafc;margin:0 4px;">+</span>
+                        <span style="color:#60a5fa;">${item.root}</span>
+                        <span style="color:#94a3b8;font-size:16px;margin-left:10px;">= ${item.meaning}</span>
+                    </div>
+                    <div id="pfxOpts" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;"></div>
+                    <div id="pfxFeedback"></div>`;
+                gameContainer.appendChild(card);
+                const optsDiv=card.querySelector('#pfxOpts');
+                opts.forEach(o=>{
+                    const b=mkBtn(o+'-');
+                    b.style.cssText='padding:12px 20px;border-radius:10px;cursor:pointer;font-size:18px;font-weight:800;font-family:inherit;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.07);color:#f8fafc;';
+                    b.onclick=()=>{
+                        card.querySelector('#pfxSelected').textContent=o;
+                        optsDiv.querySelectorAll('button').forEach(x=>x.disabled=true);
+                        const fb=card.querySelector('#pfxFeedback');
+                        if(o===item.prefix){ score++; setScore(`✅ ${score}/${pool.length}`); b.style.background='rgba(52,211,153,0.3)'; b.style.borderColor='#34d399'; fb.appendChild(feedback('🎉 正確！'+o+item.root+' = '+item.meaning,true)); setTimeout(next,1500); }
+                        else { b.style.background='rgba(248,113,113,0.3)'; optsDiv.querySelectorAll('button').forEach(x=>{ if(x.textContent===item.prefix+'-') x.style.background='rgba(52,211,153,0.2)'; }); fb.appendChild(feedback('正確答案：'+item.prefix+item.root,false)); setTimeout(next,2000); }
+                    };
+                    optsDiv.appendChild(b);
+                });
+            }
+            next();
+        }
+
+        // ============================================================
+        //  GAME 17 – True or False
+        // ============================================================
+        function game_truefalse() {
+            let score=0, q=0;
+            const pool=shuffle(TRUEFALSE);
+            function next() {
+                if(q>=pool.length){ done(score,pool.length); return; }
+                const item=pool[q++];
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:16px;align-items:center;');
+                card.innerHTML=`
+                    <p style="color:#94a3b8;font-size:13px;">這個解釋是否正確？</p>
+                    <div style="font-size:30px;font-weight:800;color:#c4b5fd;">${item.word}</div>
+                    <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:14px 20px;font-size:16px;color:#f8fafc;text-align:center;">"${item.def}"</div>
+                    <div style="display:flex;gap:16px;">
+                        <button id="tfTrue" style="padding:14px 32px;border-radius:12px;cursor:pointer;font-size:18px;font-weight:800;font-family:inherit;border:1px solid #34d399;background:rgba(52,211,153,0.2);color:#34d399;">✅ 正確</button>
+                        <button id="tfFalse" style="padding:14px 32px;border-radius:12px;cursor:pointer;font-size:18px;font-weight:800;font-family:inherit;border:1px solid #f87171;background:rgba(248,113,113,0.2);color:#f87171;">❌ 錯誤</button>
+                    </div>
+                    <div id="tfFeedback"></div>`;
+                gameContainer.appendChild(card);
+                function check(ans) {
+                    card.querySelectorAll('button').forEach(b=>b.disabled=true);
+                    const fb=card.querySelector('#tfFeedback');
+                    if(ans===item.correct){ score++; setScore(`✅ ${score}/${pool.length}`); fb.appendChild(feedback('🎉 正確！',true)); }
+                    else { fb.appendChild(feedback(`❌ 正確答案是：${item.correct?'正確':'錯誤'}`,false)); }
+                    setTimeout(next,1200);
+                }
+                card.querySelector('#tfTrue').onclick=()=>check(true);
+                card.querySelector('#tfFalse').onclick=()=>check(false);
+            }
+            next();
+        }
+
+        // ============================================================
+        //  GAME 18 – Sentence Builder (句子重組)
+        // ============================================================
+        function game_sentencebuild() {
+            let score=0, q=0;
+            const pool=shuffle(SENTENCES);
+            function next() {
+                if(q>=pool.length){ done(score,pool.length); return; }
+                const item=pool[q++];
+                let chosen=[], remaining=shuffle(item.words);
+                function render() {
+                    gameContainer.innerHTML='';
+                    const card=gc('display:flex;flex-direction:column;gap:14px;');
+                    card.innerHTML=`<p style="color:#94a3b8;font-size:13px;text-align:center;">把單字依序排列成正確的句子</p>`;
+                    const chosen_div=document.createElement('div');
+                    chosen_div.style.cssText='min-height:48px;background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;';
+                    if(chosen.length===0) { const ph=document.createElement('span'); ph.textContent='點擊下方單字來排列句子...'; ph.style.cssText='color:rgba(255,255,255,0.3);font-size:13px;'; chosen_div.appendChild(ph); }
+                    chosen.forEach((w,i)=>{ const b=mkBtn(w); b.style.cssText='padding:6px 12px;border-radius:8px;background:rgba(59,130,246,0.3);border:1px solid #3b82f6;color:#f8fafc;cursor:pointer;font-weight:600;'; b.onclick=()=>{ remaining.push(chosen.splice(i,1)[0]); render(); }; chosen_div.appendChild(b); });
+                    card.appendChild(chosen_div);
+                    const rem_div=document.createElement('div');
+                    rem_div.style.cssText='display:flex;flex-wrap:wrap;gap:8px;justify-content:center;';
+                    remaining.forEach((w,i)=>{ const b=mkBtn(w); b.style.cssText='padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);color:#f8fafc;cursor:pointer;font-weight:600;font-size:15px;'; b.onclick=()=>{ chosen.push(remaining.splice(i,1)[0]); render(); }; rem_div.appendChild(b); });
+                    card.appendChild(rem_div);
+                    const btns=document.createElement('div');
+                    btns.style.cssText='display:flex;gap:8px;justify-content:center;';
+                    const check=mkBtn('確認 ✓','padding:10px 24px;border-radius:10px;background:rgba(52,211,153,0.3);border:1px solid #34d399;color:#fff;cursor:pointer;font-weight:700;');
+                    const reset=mkBtn('重置','padding:10px 16px;border-radius:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;cursor:pointer;');
+                    check.onclick=()=>{
+                        const ans=chosen.join(' ');
+                        const fb=document.createElement('div');
+                        if(ans===item.answer){ score++; setScore(`✅ ${score}/${pool.length}`); fb.appendChild(feedback('🎉 正確！',true)); setTimeout(next,1200); }
+                        else { fb.appendChild(feedback('❌ 順序不對，再試試！',false)); }
+                        card.appendChild(fb);
+                    };
+                    reset.onclick=()=>{ remaining=[...shuffle(item.words)]; chosen=[]; render(); };
+                    btns.appendChild(check); btns.appendChild(reset);
+                    card.appendChild(btns);
+                    gameContainer.appendChild(card);
+                }
+                render();
+            }
+            next();
+        }
+
+        // ============================================================
+        //  GAME 19 – Word Chain (單字接龍)
+        // ============================================================
+        function game_wordchain() {
+            const WORD_BANK=['apple','elephant','tiger','rabbit','tree','eagle','eye','ear','run','night','time','error','rose','end','dog','great','top','pen','nose','eat','tap','planet','test','talk'];
+            let chain=[], usedWords=new Set(), score=0;
+            chain.push('START');
+            function getLastChar() { return chain[chain.length-1].slice(-1).toLowerCase(); }
+            function render() {
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:14px;');
+                card.innerHTML=`<p style="color:#94a3b8;font-size:13px;text-align:center;">每個單字的開頭字母，必須是前一個單字的最後字母</p>`;
+                const chainDiv=document.createElement('div');
+                chainDiv.style.cssText='display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:rgba(0,0,0,0.15);border-radius:10px;min-height:40px;';
+                chain.slice(-6).forEach((w,i,arr)=>{ const s=document.createElement('span'); s.style.cssText=`padding:4px 10px;border-radius:6px;font-size:14px;font-weight:600;${i===arr.length-1?'background:rgba(139,92,246,0.4);color:#c4b5fd;':'background:rgba(255,255,255,0.08);color:#f8fafc;'}`; s.textContent=w; chainDiv.appendChild(s); if(i<arr.length-1){ const a=document.createElement('span'); a.textContent='→'; a.style.cssText='color:#94a3b8;font-size:12px;display:flex;align-items:center;'; chainDiv.appendChild(a); } });
+                card.appendChild(chainDiv);
+                const hint=document.createElement('p');
+                hint.style.cssText='text-align:center;font-size:16px;font-weight:700;color:#fbbf24;';
+                hint.innerHTML=`輸入以 "<b>${getLastChar().toUpperCase()}</b>" 開頭的英文單字`;
+                card.appendChild(hint);
+                const inputRow=document.createElement('div');
+                inputRow.style.cssText='display:flex;gap:8px;';
+                const inp=document.createElement('input');
+                inp.type='text'; inp.placeholder='輸入單字...'; inp.autocomplete='off';
+                inp.style.cssText='flex:1;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px;color:#fff;font-size:16px;font-family:inherit;outline:none;';
+                const sub=mkBtn('接！','padding:10px 16px;border-radius:10px;background:rgba(139,92,246,0.4);border:1px solid #8b5cf6;color:#fff;cursor:pointer;font-weight:700;');
+                inputRow.appendChild(inp); inputRow.appendChild(sub); card.appendChild(inputRow);
+                const fb=document.createElement('div'); card.appendChild(fb);
+                setScore(`⛓️ 接龍長度：${chain.length-1}`);
+                function check() {
+                    const w=inp.value.trim().toLowerCase();
+                    if(!w){ return; }
+                    if(w[0]!==getLastChar()){ fb.appendChild(feedback(`❌ 必須以 "${getLastChar().toUpperCase()}" 開頭！`,false)); inp.value=''; return; }
+                    if(usedWords.has(w)){ fb.appendChild(feedback('❌ 已使用過這個單字！',false)); inp.value=''; return; }
+                    if(!WORD_BANK.includes(w)){ fb.appendChild(feedback('❌ 找不到這個單字，試試其他的！',false)); inp.value=''; return; }
+                    usedWords.add(w); chain.push(w); score=chain.length-1; inp.value=''; render();
+                }
+                sub.onclick=check; inp.onkeydown=e=>{ if(e.key==='Enter') check(); };
+                inp.focus();
+                gameContainer.appendChild(card);
+            }
+            render();
+        }
+
+        // ============================================================
+        //  GAME 20 – Word Ladder (單字梯)
+        // ============================================================
+        function game_wordladder() {
+            const LADDERS=[
+                {start:'cat',end:'dog',steps:['cat','bat','bad','bag','big','bid','did','dig','dog'], hint:'cat → dog'},
+                {start:'cold',end:'warm',steps:['cold','cord','word','ward','warm'], hint:'cold → warm'},
+                {start:'head',end:'tail',steps:['head','bead','beat','belt','bell','ball','tall','tail'], hint:'head → tail'},
+            ];
+            const puzzle=pick(LADDERS);
+            const maxSteps=puzzle.steps.length-1;
+            let current=puzzle.start, path=[puzzle.start], stepCount=0;
+            function isOneLetterAway(a,b){ if(a.length!==b.length) return false; let diff=0; for(let i=0;i<a.length;i++) if(a[i]!==b[i]) diff++; return diff===1; }
+            function isRealWord(w){ return puzzle.steps.includes(w)||['the','and','but','for','hat','bat','bad','bag','bid','did','dig','bead','beat','belt','bell','ball','tall','cord','word','ward'].includes(w); }
+            function render() {
+                gameContainer.innerHTML='';
+                const card=gc('display:flex;flex-direction:column;gap:14px;align-items:center;');
+                card.innerHTML=`
+                    <p style="color:#94a3b8;font-size:13px;">每次只改變一個字母，從 <b style="color:#60a5fa">${puzzle.start.toUpperCase()}</b> 爬到 <b style="color:#34d399">${puzzle.end.toUpperCase()}</b></p>
+                    <div style="display:flex;flex-direction:column;gap:4px;align-items:center;">
+                        ${path.map((w,i)=>`<div style="padding:8px 24px;border-radius:8px;font-size:18px;font-weight:800;${i===0?'background:rgba(59,130,246,0.3);color:#60a5fa;':i===path.length-1?'background:rgba(139,92,246,0.3);color:#c4b5fd;':'background:rgba(255,255,255,0.06);color:#f8fafc;'}">${w.toUpperCase()}</div>${i<path.length-1?'<div style="color:#94a3b8;">↓</div>':''}`).join('')}
+                    </div>
+                    <div style="display:flex;gap:8px;width:100%;max-width:260px;">
+                        <input id="ladderInput" type="text" maxlength="${puzzle.start.length}" placeholder="輸入下一個單字..." style="flex:1;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px;color:#fff;font-size:16px;font-family:inherit;outline:none;">
+                        <button id="ladderSubmit" style="background:rgba(139,92,246,0.4);border:1px solid #8b5cf6;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700;">↓</button>
+                    </div>
+                    <div id="ladderFeedback"></div>`;
+                setScore(`🪜 步數：${stepCount} / 最優解：${maxSteps}`);
+                gameContainer.appendChild(card);
+                const inp=card.querySelector('#ladderInput');
+                function check() {
+                    const w=inp.value.trim().toLowerCase();
+                    const fb=card.querySelector('#ladderFeedback');
+                    if(w.length!==puzzle.start.length){ fb.appendChild(feedback(`❌ 必須是 ${puzzle.start.length} 個字母的單字`,false)); inp.value=''; return; }
+                    if(!isOneLetterAway(current,w)){ fb.appendChild(feedback('❌ 只能改變一個字母！',false)); inp.value=''; return; }
+                    if(!isRealWord(w)){ fb.appendChild(feedback('❌ 不是有效的英文單字！',false)); inp.value=''; return; }
+                    stepCount++; current=w; path.push(w); inp.value='';
+                    if(w===puzzle.end){
+                        setScore(`🏆 完成！共 ${stepCount} 步（最優：${maxSteps} 步）`);
+                        gameContainer.innerHTML=''; const c=gc('text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;');
+                        c.innerHTML=`<div style="font-size:40px;">🏆</div><div style="font-size:22px;font-weight:800;color:#34d399;">${puzzle.start.toUpperCase()} → ${puzzle.end.toUpperCase()} 完成！</div><div style="font-size:16px;color:#fbbf24;">${stepCount} 步完成（最優解：${maxSteps} 步）</div>`;
+                        const rb=mkBtn('換一題','background:rgba(59,130,246,0.3);border:1px solid #3b82f6;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-weight:700;');
+                        rb.onclick=game_wordladder; c.appendChild(rb); gameContainer.appendChild(c);
+                        return;
+                    }
+                    render();
+                }
+                card.querySelector('#ladderSubmit').onclick=check;
+                inp.onkeydown=e=>{ if(e.key==='Enter') check(); };
+                inp.focus();
+            }
+            render();
+        }
+
+        // ── Helpers ───────────────────────────────────────────────
+        function done(score, total) {
+            gameContainer.innerHTML='';
+            const card=gc('text-align:center;display:flex;flex-direction:column;gap:16px;align-items:center;');
+            const pct=Math.round(score/total*100);
+            const emoji=pct>=80?'🏆':pct>=50?'👍':'💪';
+            card.innerHTML=`
+                <div style="font-size:52px;">${emoji}</div>
+                <div style="font-size:24px;font-weight:800;color:#fbbf24;">完成！${score}/${total} 題正確 (${pct}%)</div>
+                <div style="width:100%;max-width:280px;height:10px;background:rgba(255,255,255,0.1);border-radius:5px;overflow:hidden;">
+                    <div style="width:${pct}%;height:100%;background:${pct>=80?'#34d399':pct>=50?'#fbbf24':'#f87171'};border-radius:5px;"></div>
+                </div>`;
+            const rb=mkBtn('再玩一次 ↺','background:rgba(139,92,246,0.3);border:1px solid #8b5cf6;color:#fff;padding:12px 28px;border-radius:12px;cursor:pointer;font-size:16px;font-weight:700;');
+            rb.onclick=()=>{ gameMenuView.style.display='block'; gamePlayView.style.display='none'; setScore(''); currentGameTitle.textContent=''; };
+            card.appendChild(rb);
+            gameContainer.appendChild(card);
+        }
+
+        // Map game IDs to runner functions
+        const GAME_RUNNERS = {
+            wordscramble: game_wordscramble,
+            hangman:      game_hangman,
+            wordmatch:    game_wordmatch,
+            spellingbee:  game_spellingbee,
+            fillblank:    game_fillblank,
+            wordtyper:    game_wordtyper,
+            antonym:      game_antonym,
+            synonym:      game_synonym,
+            wordsearch:   game_wordsearch,
+            categorize:   game_categorize,
+            memorygrid:   game_memorygrid,
+            idiomguess:   game_idiomguess,
+            letterfall:   game_letterfall,
+            wordwheel:    game_wordwheel,
+            crossword:    game_crossword,
+            prefixsuffix: game_prefixsuffix,
+            truefalse:    game_truefalse,
+            sentencebuild:game_sentencebuild,
+            wordchain:    game_wordchain,
+            wordladder:   game_wordladder,
+        };
+
+    })(); // end IIFE
+
+
     // ===== Mobile Tab Switching =====
     function isMobile() {
         return window.innerWidth <= 640;
