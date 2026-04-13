@@ -581,18 +581,20 @@ select option {
 }
 
 .compound-inputs {
-    flex: 1;
-    min-width: 300px;
+    flex: 0 0 280px;
+    min-width: 260px;
+    max-width: 280px;
 }
 
 .compound-chart-wrapper {
-    flex: 2;
+    flex: 1;
+    min-width: 0;
     background: rgba(0,0,0,0.2);
     border-radius: 16px;
     padding: 16px;
     border: 1px solid var(--panel-border);
     position: relative;
-    min-height: 300px;
+    min-height: 340px;
 }
 
 @media (max-width: 768px) {
@@ -1100,7 +1102,7 @@ span.pronounce-wrong {
             <main>
                 <div class="input-section">
                     <div class="input-group">
-                        <label for="stockCode">股票代號 / 名稱 (選填，格式: 2330 台積電)</label>
+                        <label for="stockCode">股票代號 / 名稱</label>
                         <div class="input-wrapper">
                             <input type="text" id="stockCode" placeholder="例如: 2330 或 2330 台積電">
                         </div>
@@ -1143,7 +1145,7 @@ span.pronounce-wrong {
 
                 <div class="settings-section">
                     <div class="input-group">
-                        <label for="stockType">股票類別 (交易稅)</label>
+                        <label for="stockType">股票類別</label>
                         <select id="stockType">
                             <option value="0.003">一般股票 (0.3%)</option>
                             <option value="0.001">ETF (0.1%)</option>
@@ -1194,11 +1196,11 @@ span.pronounce-wrong {
                             <span id="taxVal">0</span>
                         </div>
                         <div class="detail-row highlight-row">
-                            <span>買進總成本 (全)</span>
+                            <span>買進總成本</span>
                             <span id="totalCostVal">0</span>
                         </div>
                         <div class="detail-row highlight-row">
-                            <span>賣出總收入 (全)</span>
+                            <span>賣出總收入</span>
                             <span id="totalRevenueVal">0</span>
                         </div>
                     </div>
@@ -1262,13 +1264,13 @@ span.pronounce-wrong {
                 </div>
                 <div style="display:flex; gap:16px; flex-basis:100%; margin-top:4px; flex-wrap:wrap;">
                     <div class="dashboard-card" style="flex:1; min-width:160px;">
-                        <span class="label">總未實現損益 (含現價推算)</span>
+                        <span class="label">總未實現損益</span>
                         <span class="value" id="totalInventoryProfit">0</span>
                         <span id="totalInventoryProfitRate"
                             style="font-size:14px; font-weight:700; margin-top:2px;">0.00%</span>
                     </div>
                     <div class="dashboard-card" style="flex:1; min-width:160px;">
-                        <span class="label">總付出成本 (全庫存)</span>
+                        <span class="label">總付出成本</span>
                         <span class="value" id="totalInventoryCost">0</span>
                     </div>
                     <div class="dashboard-card"
@@ -1293,7 +1295,7 @@ span.pronounce-wrong {
                 </div>
                 <div class="dashboard-card"
                     style="flex-basis: 100%; margin-top: 10px; background: rgba(16, 185, 129, 0.1); border: 1px dashed rgba(16, 185, 129, 0.3);">
-                    <span class="label">年度領息總結 (包含8.5%可抵扣稅額推算)</span>
+                    <span class="label">年度領息總結</span>
                     <div style="display:flex; justify-content:space-between; margin-top: 8px;">
                         <div style="display:flex; flex-direction:column;">
                             <span style="font-size:12px; color:var(--text-secondary);">年度總領配息</span>
@@ -1327,7 +1329,7 @@ span.pronounce-wrong {
             <div id="shortTermView" style="display:none; flex-direction:column; flex-grow:1; flex-shrink:1; min-height:0;">
                 <div class="inventory-dashboard" style="flex-wrap: wrap;">
                     <div class="dashboard-card" style="flex-basis:100%;">
-                        <span class="label">短期操作本金 (點擊輸入金額)</span>
+                        <span class="label">短期操作本金</span>
                         <div style="display:flex; align-items:center;">
                             <span style="font-size:24px; font-weight:800; margin-right:4px;">$</span>
                             <input type="number" id="shortTermCapitalInput" value="0" min="0" step="1"
@@ -1336,11 +1338,11 @@ span.pronounce-wrong {
                     </div>
                     <div style="display:flex; gap:16px; flex-basis:100%; flex-wrap:wrap; margin-top:4px;">
                         <div class="dashboard-card" style="flex:1;">
-                            <span class="label">總付出成本 (已投入市場)</span>
+                            <span class="label">總付出成本</span>
                             <span class="value" id="stTotalCost">0</span>
                         </div>
                         <div class="dashboard-card" style="flex:1;">
-                            <span class="label">短期已實現損益 (修改)</span>
+                            <span class="label">短期已實現損益</span>
                             <div style="display:flex; align-items:center;">
                                 <span style="font-size:20px; font-weight:800; margin-right:4px;">$</span>
                                 <input type="number" id="stRealizedInput" value="0" step="1"
@@ -1353,7 +1355,7 @@ span.pronounce-wrong {
                         </div>
                     </div>
                     <div class="dashboard-card highlight-card" style="flex-basis:100%; margin-top:16px;">
-                        <span class="label">短期總未實現損益 (含現價推算)</span>
+                        <span class="label">短期總未實現損益</span>
                         <div style="display:flex; align-items:baseline; gap:12px;">
                             <span class="value" id="stTotalProfit">0</span>
                             <span id="stTotalProfitRate" style="font-size:16px; font-weight:700;">0.00%</span>
@@ -1374,7 +1376,7 @@ span.pronounce-wrong {
 
     <!-- 複利計算機 Modal -->
     <div id="compoundModal" class="modal-overlay">
-        <div class="glass-panel modal-panel">
+        <div class="glass-panel modal-panel" style="max-width:900px; width:95%;">
             <header class="modal-header">
                 <h2>📈 複利試算</h2>
                 <button id="closeModalBtn" class="close-btn">&times;</button>
@@ -1384,7 +1386,7 @@ span.pronounce-wrong {
                     <!-- 左側輸入區 -->
                     <div class="compound-inputs input-section">
                         <div class="input-group">
-                            <label>初始本金 (自動帶入純股票庫存市值)</label>
+                            <label>初始本金</label>
                             <div class="input-wrapper">
                                 <span class="currency">NT$</span>
                                 <input type="number" id="cpPrincipal" value="0" min="0" step="1">
@@ -1421,7 +1423,7 @@ span.pronounce-wrong {
                         </div>
                         <div class="compound-subresults">
                             <div class="detail-row">
-                                <span>總投入本金(含初始)</span>
+                                <span>總投入本金</span>
                                 <span id="cpTotalInvested">0</span>
                             </div>
                             <div class="detail-row">
@@ -1773,22 +1775,27 @@ span.pronounce-wrong {
 
     <!-- 歷史統計 Modal -->
     <div class="modal-overlay" id="historyModal">
-        <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-content" style="max-width: 960px;">
             <div class="modal-header">
                 <h2>📈 每日歷史統計</h2>
-                <button class="close-btn" id="closeHistoryModalBtn">&times;</button>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button id="historySnapshotBtn" class="btn secondary-btn" style="padding:6px 14px; font-size:13px; background:rgba(52,211,153,0.15); border-color:rgba(52,211,153,0.4); color:#6ee7b7;" title="把今日最新數據寫入歷史統計">📸 立即快照</button>
+                    <button class="close-btn" id="closeHistoryModalBtn">&times;</button>
+                </div>
             </div>
+            <p style="font-size:12px; color:#94a3b8; margin:-8px 0 12px; padding:0 2px;">點擊任意數字欄位可直接修改，修改後自動儲存。</p>
             <div class="modal-body" style="overflow-x: auto; max-height: 60vh;">
                 <table class="history-table" style="width: 100%; text-align: right; border-collapse: collapse;">
                     <thead>
                         <tr style="border-bottom: 2px solid rgba(255,255,255,0.1);">
-                            <th style="padding: 10px; text-align: left; color: var(--text-secondary);">交易日期</th>
-                            <th style="padding: 10px; color: var(--text-secondary);">總付出成本</th>
-                            <th style="padding: 10px; color: var(--text-secondary);">總庫存市值</th>
-                            <th style="padding: 10px; color: var(--text-secondary);">總未實現損益</th>
-                            <th style="padding: 10px; color: var(--text-secondary);">未實現增減(與前日)</th>
-                            <th style="padding: 10px; color: var(--text-secondary);">總淨資產</th>
-                            <th style="padding: 10px; color: var(--text-secondary);">2330收盤價</th>
+                            <th style="padding: 10px; text-align: left; color: var(--text-secondary); white-space:nowrap;">交易日期</th>
+                            <th style="padding: 10px; color: var(--text-secondary); white-space:nowrap;">總付出成本</th>
+                            <th style="padding: 10px; color: var(--text-secondary); white-space:nowrap;">總庫存市值</th>
+                            <th style="padding: 10px; color: var(--text-secondary); white-space:nowrap;">總未實現損益</th>
+                            <th style="padding: 10px; color: var(--text-secondary); white-space:nowrap;">與前日增減</th>
+                            <th style="padding: 10px; color: var(--text-secondary); white-space:nowrap;">總淨資產</th>
+                            <th style="padding: 10px; color: var(--text-secondary); white-space:nowrap;">2330收盤</th>
+                            <th style="padding: 10px; color: var(--text-secondary); white-space:nowrap;">操作</th>
                         </tr>
                     </thead>
                     <tbody id="historyTableBody">
@@ -1797,6 +1804,29 @@ span.pronounce-wrong {
                 </table>
             </div>
         </div>
+    </div>
+
+
+    <!-- ── 即時浮動查字典 Popup ── -->
+    <div id="floatDictPopup" style="display:none; position:fixed; z-index:9999; background:rgba(10,18,38,0.98); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border:1px solid rgba(59,130,246,0.45); border-radius:18px; padding:0; min-width:300px; max-width:380px; max-height:80vh; box-shadow:0 12px 48px rgba(0,0,0,0.7); font-family:'Outfit','Noto Sans TC',sans-serif; overflow:hidden; display:none; flex-direction:column;">
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px 10px; border-bottom:1px solid rgba(255,255,255,0.08); flex-shrink:0;">
+            <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;">
+                <span id="floatDictWord" style="font-size:22px; font-weight:800; color:#fff; letter-spacing:0.5px;"></span>
+                <span id="floatDictIpa" style="color:#7dd3fc; font-family:monospace; font-size:13px;"></span>
+            </div>
+            <div style="display:flex; gap:4px; align-items:center; flex-shrink:0; margin-left:8px;">
+                <button id="floatDictAudio" title="播放發音" style="background:rgba(59,130,246,0.2); border:1px solid rgba(59,130,246,0.4); border-radius:8px; font-size:16px; cursor:pointer; padding:4px 8px; line-height:1; transition:background 0.15s;">🔊</button>
+                <button id="floatDictClose" style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); color:#94a3b8; font-size:18px; cursor:pointer; line-height:1; border-radius:8px; padding:2px 8px; transition:background 0.15s;">&times;</button>
+            </div>
+        </div>
+        <!-- Loading -->
+        <div id="floatDictLoading" style="padding:20px 16px; color:#94a3b8; font-size:13px; text-align:center; display:none;">查詢中... ⏳</div>
+        <!-- Body (scrollable) -->
+        <div id="floatDictBody" style="display:none; overflow-y:auto; padding:0 16px 14px; max-height:calc(80vh - 60px);">
+        </div>
+        <!-- Error -->
+        <div id="floatDictError" style="display:none; padding:16px; color:#f87171; font-size:13px; text-align:center;"></div>
     </div>
 
     <!-- PWA Install Banner -->
@@ -2687,8 +2717,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="inv-result-val ${profitClass}">${profitStr}</span>
                         <span class="inv-result-rate ${profitClass}">${rateStr}</span>
                         <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px; display:flex; gap:12px;">
-                            <span>股票佔比: ${stockRatio.toFixed(1)}%</span>
-                            <span>總資產佔比: ${assetRatio.toFixed(1)}%</span>
+                            <span>股票 ${stockRatio.toFixed(1)}%</span>
+                            <span>總資產 ${assetRatio.toFixed(1)}%</span>
                         </div>
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:flex-end; justify-content:center;">
@@ -2751,9 +2781,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Bind events to new elements
         document.querySelectorAll('.live-price-input').forEach(input => {
-            input.addEventListener('change', (e) => {
+            input.addEventListener('change', async (e) => {
                 const id = e.target.getAttribute('data-id');
                 updateItemPrice(id, e.target.value);
+                // 手動改股價後也記錄今日快照
+                await logDailyStats();
             });
         });
 
@@ -3269,34 +3301,152 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderHistoryTable() {
         if (!historyTableBody) return;
         historyTableBody.innerHTML = '';
-        const reversed = [...dailyStats].reverse();
-        reversed.forEach(stat => {
-            const tr = document.createElement('tr');
-            
-            let diffColor = stat.profitDiff > 0 ? '#f87171' : (stat.profitDiff < 0 ? '#4ade80' : 'var(--text-primary)');
-            const diffStr = (stat.profitDiff > 0 ? '+' : '') + formatCurrency(stat.profitDiff);
-            const profitColor = stat.totalProfit > 0 ? '#f87171' : (stat.totalProfit < 0 ? '#4ade80' : 'var(--text-primary)');
-            const profitStr = (stat.totalProfit > 0 ? '+' : '') + formatCurrency(stat.totalProfit);
 
-            tr.innerHTML = `
-                <td style="padding: 10px; text-align: left; color: #f8fafc;">${stat.date}</td>
-                <td style="padding: 10px;">${formatCurrency(stat.totalCost)}</td>
-                <td style="padding: 10px;">${formatCurrency(stat.totalMarket)}</td>
-                <td style="padding: 10px; color: ${profitColor};">${profitStr}</td>
-                <td style="padding: 10px; color: ${diffColor};">${diffStr}</td>
-                <td style="padding: 10px; color: #60a5fa; font-weight: bold;">${formatCurrency(stat.totalAsset)}</td>
-                <td style="padding: 10px;">${formatCurrency(stat.tsmcPrice, true)}</td>
-            `;
+        // Helper: recalculate profitDiff for all rows after edit
+        function recalcDiffs() {
+            for (let i = 0; i < dailyStats.length; i++) {
+                const prev = i > 0 ? (dailyStats[i-1].totalProfit || 0) : 0;
+                dailyStats[i].profitDiff = (dailyStats[i].totalProfit || 0) - prev;
+            }
+            localStorage.setItem('twStockDailyStats', JSON.stringify(dailyStats));
+        }
+
+        // Helper: make an editable number cell
+        function makeEditCell(statIdx, field, value, colorFn, isMoney, decimals) {
+            const td = document.createElement('td');
+            td.style.cssText = 'padding:4px 6px; text-align:right;';
+
+            const display = document.createElement('span');
+            const numVal = window.parseFloat(value) || 0;
+            display.textContent = isMoney ? formatCurrency(numVal, decimals) : String(numVal);
+            if (colorFn) display.style.color = colorFn(numVal);
+            display.style.cssText += 'cursor:pointer; border-bottom:1px dashed rgba(255,255,255,0.2); padding:6px 8px; display:inline-block; min-width:70px; border-radius:4px; transition:background 0.15s;';
+            display.title = '點擊編輯';
+            display.onmouseover = () => { display.style.background = 'rgba(255,255,255,0.07)'; };
+            display.onmouseleave = () => { display.style.background = ''; };
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.inputMode = 'decimal';
+            input.value = String(numVal);
+            input.style.cssText = 'display:none; background:rgba(59,130,246,0.2); border:1px solid #3b82f6; border-radius:6px; color:#f8fafc; font-size:13px; font-weight:600; font-family:inherit; padding:5px 8px; width:90px; text-align:right; outline:none;';
+
+            function startEdit() {
+                display.style.display = 'none';
+                input.style.display = 'inline-block';
+                input.value = String(window.parseFloat(value) || 0);
+                input.select();
+                input.focus();
+            }
+            function commitEdit() {
+                const newVal = window.parseFloat(input.value) || 0;
+                dailyStats[statIdx][field] = newVal;
+                // Auto-recalculate derived fields
+                if (field === 'totalMarket' || field === 'totalCost') {
+                    dailyStats[statIdx].totalProfit = (dailyStats[statIdx].totalMarket || 0) - (dailyStats[statIdx].totalCost || 0);
+                }
+                recalcDiffs();
+                input.style.display = 'none';
+                display.style.display = 'inline-block';
+                renderHistoryTable(); // re-render to reflect all changes
+            }
+
+            display.onclick = startEdit;
+            input.onblur = commitEdit;
+            input.onkeydown = (e) => { if (e.key === 'Enter') { input.blur(); } if (e.key === 'Escape') { input.style.display='none'; display.style.display='inline-block'; } };
+
+            td.appendChild(display);
+            td.appendChild(input);
+            return td;
+        }
+
+        const reversed = [...dailyStats].map((s,i) => ({...s, _origIdx: i})).reverse();
+
+        reversed.forEach(stat => {
+            const origIdx = stat._origIdx;
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            tr.onmouseover  = () => { tr.style.background = 'rgba(255,255,255,0.03)'; };
+            tr.onmouseleave = () => { tr.style.background = ''; };
+
+            // 日期欄（可編輯）
+            const dateTd = document.createElement('td');
+            dateTd.style.cssText = 'padding:4px 6px; text-align:left;';
+            const dateSpan = document.createElement('span');
+            dateSpan.textContent = stat.date;
+            dateSpan.style.cssText = 'cursor:pointer; border-bottom:1px dashed rgba(255,255,255,0.2); padding:6px 8px; display:inline-block; color:#f8fafc; border-radius:4px; font-size:13px; white-space:nowrap;';
+            dateSpan.title = '點擊編輯日期';
+            const dateInp = document.createElement('input');
+            dateInp.type = 'text'; dateInp.value = stat.date;
+            dateInp.style.cssText = 'display:none; background:rgba(59,130,246,0.2); border:1px solid #3b82f6; border-radius:6px; color:#f8fafc; font-size:13px; font-family:inherit; padding:5px 8px; width:100px; outline:none;';
+            dateSpan.onclick = () => { dateSpan.style.display='none'; dateInp.style.display='inline-block'; dateInp.select(); dateInp.focus(); };
+            dateInp.onblur  = () => { dailyStats[origIdx].date = dateInp.value; localStorage.setItem('twStockDailyStats', JSON.stringify(dailyStats)); dateInp.style.display='none'; dateSpan.style.display='inline-block'; renderHistoryTable(); };
+            dateInp.onkeydown = (e) => { if(e.key==='Enter') dateInp.blur(); if(e.key==='Escape'){dateInp.style.display='none';dateSpan.style.display='inline-block';} };
+            dateTd.appendChild(dateSpan); dateTd.appendChild(dateInp);
+            tr.appendChild(dateTd);
+
+            // 數字欄
+            const profitColor = v => v > 0 ? '#f87171' : (v < 0 ? '#4ade80' : 'var(--text-primary)');
+            const diffColor   = v => v > 0 ? '#f87171' : (v < 0 ? '#4ade80' : 'var(--text-primary)');
+            const blueColor   = () => '#60a5fa';
+
+            tr.appendChild(makeEditCell(origIdx, 'totalCost',   stat.totalCost,   null,        true,  false));
+            tr.appendChild(makeEditCell(origIdx, 'totalMarket', stat.totalMarket, null,        true,  false));
+            tr.appendChild(makeEditCell(origIdx, 'totalProfit', stat.totalProfit, profitColor, true,  false));
+            tr.appendChild(makeEditCell(origIdx, 'profitDiff',  stat.profitDiff,  diffColor,   true,  false));
+            tr.appendChild(makeEditCell(origIdx, 'totalAsset',  stat.totalAsset,  blueColor,   true,  false));
+            tr.appendChild(makeEditCell(origIdx, 'tsmcPrice',   stat.tsmcPrice,   null,        true,  true));
+
+            // 刪除按鈕欄
+            const delTd = document.createElement('td');
+            delTd.style.cssText = 'padding:4px 8px; text-align:center;';
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '✕';
+            delBtn.title = '刪除此筆記錄';
+            delBtn.style.cssText = 'background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171; border-radius:6px; padding:3px 8px; cursor:pointer; font-size:12px; transition:background 0.15s;';
+            delBtn.onmouseover  = () => { delBtn.style.background='rgba(239,68,68,0.3)'; };
+            delBtn.onmouseleave = () => { delBtn.style.background='rgba(239,68,68,0.15)'; };
+            delBtn.onclick = () => {
+                if (confirm(`確定刪除 ${stat.date} 的記錄嗎？`)) {
+                    dailyStats.splice(origIdx, 1);
+                    recalcDiffs();
+                    renderHistoryTable();
+                }
+            };
+            delTd.appendChild(delBtn);
+            tr.appendChild(delTd);
+
             historyTableBody.appendChild(tr);
         });
+
+        if (dailyStats.length === 0) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = '<td colspan="8" style="padding:30px; text-align:center; color:#94a3b8;">尚無歷史統計資料。按「更新股價」或「立即快照」按鈕來記錄今日數據。</td>';
+            historyTableBody.appendChild(tr);
+        }
     }
 
     if (openHistoryStatsBtn) {
-        openHistoryStatsBtn.addEventListener('click', () => {
+        openHistoryStatsBtn.addEventListener('click', async () => {
+            // 每次開啟都先執行一次快照，確保今日資料是最新的
+            await logDailyStats();
             renderHistoryTable();
             historyModal.classList.add('active');
         });
     }
+
+    // 立即快照按鈕
+    document.addEventListener('click', async (e) => {
+        if (e.target && e.target.id === 'historySnapshotBtn') {
+            const btn = e.target;
+            btn.textContent = '⏳ 快照中...';
+            btn.disabled = true;
+            await logDailyStats();
+            renderHistoryTable();
+            btn.textContent = '✅ 已更新';
+            setTimeout(() => { btn.textContent = '📸 立即快照'; btn.disabled = false; }, 1500);
+        }
+    });
     if (closeHistoryModalBtn) {
         closeHistoryModalBtn.addEventListener('click', () => {
             historyModal.classList.remove('active');
@@ -4180,10 +4330,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (playAudioBtn) {
         playAudioBtn.addEventListener('click', () => {
-            if (currentAudioUrl) {
-                new Audio(currentAudioUrl).play().catch(e => speakTTS(currentWord));
+            if (currentAudioUrl && currentAudioUrl.startsWith('http')) {
+                new Audio(currentAudioUrl).play().catch(() => speakTTS(currentWord, 'en-US'));
             } else {
-                speakTTS(currentWord);
+                speakTTS(currentWord, 'en-US');
             }
         });
     }
@@ -4393,10 +4543,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const ph = entry.phonetics.find(p => p.text);
                 if (ph) ipa = ph.text;
                 
-                const usAu = entry.phonetics.find(p => p.audio && p.audio.includes('-us.mp3'));
-                const anyAu = entry.phonetics.find(p => p.audio);
-                if (usAu) audioUrl = usAu.audio;
-                else if (anyAu) audioUrl = anyAu.audio;
+                // 優先選有效的美式發音，再選任何有 https 的音訊
+                const usAu  = entry.phonetics.find(p => p.audio && p.audio.includes('-us'));
+                const anyAu = entry.phonetics.find(p => p.audio && p.audio.trim() !== '');
+                const rawUrl = (usAu || anyAu)?.audio || '';
+                // 補齊 protocol（有些 API 回傳 //ssl.gstatic... 沒有 https:）
+                if (rawUrl.startsWith('//')) audioUrl = 'https:' + rawUrl;
+                else if (rawUrl.startsWith('http')) audioUrl = rawUrl;
+                else audioUrl = '';  // 不確定的 URL 一律清空，改用 TTS
                 
                 let foundDef = false;
                 for (let m of entry.meanings) {
@@ -4411,7 +4565,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            if (examplesRaw.length === 0) examplesRaw.push(`I am learning the word ${word}.`);
+            // 若字典 API 沒有例句，嘗試從 Datamuse 抓例句
+            if (examplesRaw.length === 0) {
+                try {
+                    const dmEgRes = await fetch(`https://api.datamuse.com/words?ml=${encodeURIComponent(word)}&md=d&max=5`);
+                    if (dmEgRes.ok) {
+                        const dmEgJson = await dmEgRes.json();
+                        for (const item of dmEgJson) {
+                            if (item.defs) {
+                                for (const def of item.defs) {
+                                    const parts2 = def.split('\t');
+                                    if (parts2[1] && parts2[1].length > 20 && !parts2[1].includes(word + '.')) {
+                                        examplesRaw.push(parts2[1]);
+                                        if (examplesRaw.length >= 2) break;
+                                    }
+                                }
+                            }
+                            if (examplesRaw.length >= 2) break;
+                        }
+                    }
+                } catch(e) {}
+            }
+            // 最終 fallback：用真實句型範本，不只是 "I am learning the word X"
+            if (examplesRaw.length === 0) {
+                const templates = [
+                    `She showed great ${word} during the difficult times.`,
+                    `The concept of ${word} is essential in this field.`,
+                    `He described the situation as ${word}.`,
+                    `Understanding ${word} can help you communicate more effectively.`,
+                    `The teacher explained what ${word} means with a real-life example.`,
+                ];
+                examplesRaw.push(templates[Math.floor(Math.random() * templates.length)]);
+            }
 
             // Translate definition and all examples at once via Google Translate undocumented
             let combinedString = `${word} ||| ${engDef}`;
@@ -4499,6 +4684,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tabArticleBtn2.addEventListener('click',   () => { tabGamesBtn.classList.remove('active-tab'); gamesSection.style.display='none'; });
 
         backToGameMenuBtn.addEventListener('click', () => {
+            cleanupCurrentGame();              // 清除計時器等殘留
             gamePlayView.style.display = 'none';
             gameMenuView.style.display = 'block';
             gameScoreDisplay.textContent = '';
@@ -4545,7 +4731,20 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // ── 全域遊戲清除 ──────────────────────────────────────────
+        let _gameCleanup = null;  // 目前遊戲的清理函數
+
+        function cleanupCurrentGame() {
+            if (_gameCleanup) {
+                try { _gameCleanup(); } catch(e) {}
+                _gameCleanup = null;
+            }
+            // 清除所有可能遺留的全域事件
+            document.onkeydown = null;
+        }
+
         function launchGame(g) {
+            cleanupCurrentGame();              // 先清除舊遊戲
             gameMenuView.style.display = 'none';
             gamePlayView.style.display = 'flex';
             currentGameTitle.textContent = `${g.emoji} ${g.name}`;
@@ -4558,28 +4757,141 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ── Word banks ───────────────────────────────────────────
         const VOCAB = [
-            {en:'abundant',zh:'豐富的'}, {en:'barrier',zh:'障礙'}, {en:'capture',zh:'捕獲'},
-            {en:'decline',zh:'下降'}, {en:'emerge',zh:'出現'}, {en:'fragile',zh:'脆弱的'},
-            {en:'genuine',zh:'真實的'}, {en:'hesitate',zh:'猶豫'}, {en:'ignore',zh:'忽視'},
-            {en:'justify',zh:'辯護'}, {en:'keen',zh:'渴望的'}, {en:'linger',zh:'徘徊'},
-            {en:'migrate',zh:'遷移'}, {en:'notion',zh:'概念'}, {en:'obstacle',zh:'障礙物'},
-            {en:'persist',zh:'堅持'}, {en:'quest',zh:'追求'}, {en:'reveal',zh:'揭示'},
-            {en:'scarce',zh:'稀缺的'}, {en:'thrive',zh:'茁壯'}, {en:'unique',zh:'獨特的'},
-            {en:'vague',zh:'模糊的'}, {en:'wander',zh:'漫遊'}, {en:'yearn',zh:'渴望'},
-            {en:'abolish',zh:'廢除'}, {en:'blunt',zh:'直率的'}, {en:'conceal',zh:'隱藏'},
-            {en:'devote',zh:'奉獻'}, {en:'enhance',zh:'增強'}, {en:'flaw',zh:'缺陷'},
+            // A
+            {en:'abandon',zh:'放棄'},{en:'abundant',zh:'豐富的'},{en:'achieve',zh:'達成'},{en:'acquire',zh:'獲得'},
+            {en:'adapt',zh:'適應'},{en:'adequate',zh:'足夠的'},{en:'advocate',zh:'倡導'},{en:'affect',zh:'影響'},
+            {en:'affirm',zh:'肯定'},{en:'afford',zh:'負擔得起'},{en:'aggravate',zh:'加重'},{en:'alert',zh:'警覺'},
+            {en:'alter',zh:'改變'},{en:'ambiguous',zh:'模糊的'},{en:'analyze',zh:'分析'},{en:'ancient',zh:'古老的'},
+            {en:'anxious',zh:'焦慮的'},{en:'apparent',zh:'明顯的'},{en:'approach',zh:'方法/接近'},{en:'approve',zh:'批准'},
+            {en:'assert',zh:'聲稱'},{en:'assist',zh:'協助'},{en:'assume',zh:'假設'},{en:'attach',zh:'附加'},
+            {en:'attain',zh:'達到'},{en:'attempt',zh:'嘗試'},{en:'aware',zh:'意識到的'},
+            // B
+            {en:'barrier',zh:'障礙'},{en:'benefit',zh:'利益'},{en:'blunt',zh:'直率的'},{en:'boost',zh:'提升'},
+            {en:'brief',zh:'簡短的'},{en:'brilliant',zh:'傑出的'},{en:'burden',zh:'負擔'},
+            // C
+            {en:'capture',zh:'捕獲'},{en:'certain',zh:'確定的'},{en:'challenge',zh:'挑戰'},{en:'chronic',zh:'慢性的'},
+            {en:'clarify',zh:'澄清'},{en:'collapse',zh:'崩潰'},{en:'commit',zh:'承諾'},{en:'complex',zh:'複雜的'},
+            {en:'conceal',zh:'隱藏'},{en:'concept',zh:'概念'},{en:'concern',zh:'擔憂'},{en:'confirm',zh:'確認'},
+            {en:'conflict',zh:'衝突'},{en:'consider',zh:'考慮'},{en:'constant',zh:'持續的'},{en:'construct',zh:'建造'},
+            {en:'contrary',zh:'相反的'},{en:'convince',zh:'說服'},{en:'cooperate',zh:'合作'},{en:'courage',zh:'勇氣'},
+            {en:'creative',zh:'創意的'},{en:'critical',zh:'批判的'},{en:'crucial',zh:'關鍵的'},
+            // D
+            {en:'decline',zh:'下降'},{en:'dedicate',zh:'致力於'},{en:'define',zh:'定義'},{en:'delay',zh:'延誤'},
+            {en:'deliver',zh:'傳遞'},{en:'depend',zh:'依賴'},{en:'describe',zh:'描述'},{en:'desire',zh:'渴望'},
+            {en:'despite',zh:'儘管'},{en:'detect',zh:'偵測'},{en:'determine',zh:'決定'},{en:'devote',zh:'奉獻'},
+            {en:'diminish',zh:'減少'},{en:'discover',zh:'發現'},{en:'display',zh:'展示'},{en:'distinct',zh:'明顯的'},
+            {en:'dominate',zh:'支配'},{en:'durable',zh:'耐用的'},
+            // E
+            {en:'effective',zh:'有效的'},{en:'efficient',zh:'有效率的'},{en:'emerge',zh:'出現'},{en:'enhance',zh:'增強'},
+            {en:'enormous',zh:'巨大的'},{en:'ensure',zh:'確保'},{en:'essential',zh:'必要的'},{en:'establish',zh:'建立'},
+            {en:'evaluate',zh:'評估'},{en:'evolve',zh:'進化'},{en:'exceed',zh:'超越'},{en:'exclude',zh:'排除'},
+            {en:'exhaust',zh:'耗盡'},{en:'expand',zh:'擴展'},{en:'expose',zh:'暴露'},{en:'express',zh:'表達'},
+            // F
+            {en:'facilitate',zh:'促進'},{en:'flexible',zh:'靈活的'},{en:'flourish',zh:'繁盛'},{en:'focus',zh:'專注'},
+            {en:'fragile',zh:'脆弱的'},{en:'frequent',zh:'頻繁的'},{en:'fulfill',zh:'履行'},
+            // G
+            {en:'generate',zh:'產生'},{en:'genuine',zh:'真實的'},{en:'govern',zh:'管治'},{en:'grateful',zh:'感激的'},
+            {en:'guarantee',zh:'保證'},
+            // H
+            {en:'hesitate',zh:'猶豫'},{en:'highlight',zh:'突出'},{en:'humble',zh:'謙遜的'},
+            // I
+            {en:'identify',zh:'識別'},{en:'ignore',zh:'忽視'},{en:'illustrate',zh:'說明'},{en:'impact',zh:'影響'},
+            {en:'imply',zh:'暗示'},{en:'improve',zh:'改善'},{en:'indicate',zh:'表示'},{en:'influence',zh:'影響'},
+            {en:'intense',zh:'強烈的'},{en:'interpret',zh:'解釋'},{en:'involve',zh:'涉及'},
+            // J-K
+            {en:'justify',zh:'辯護'},{en:'keen',zh:'渴望的'},{en:'knowledge',zh:'知識'},
+            // L
+            {en:'liberal',zh:'自由的'},{en:'limited',zh:'有限的'},{en:'linger',zh:'徘徊'},{en:'logical',zh:'合理的'},
+            // M
+            {en:'maintain',zh:'維持'},{en:'manage',zh:'管理'},{en:'manifest',zh:'表明'},{en:'migrate',zh:'遷移'},
+            {en:'moderate',zh:'適度的'},{en:'monitor',zh:'監控'},{en:'motivate',zh:'激勵'},
+            // N
+            {en:'neutral',zh:'中立的'},{en:'notion',zh:'概念'},{en:'numerous',zh:'眾多的'},
+            // O
+            {en:'obstacle',zh:'障礙物'},{en:'obvious',zh:'明顯的'},{en:'obtain',zh:'獲得'},{en:'occur',zh:'發生'},
+            {en:'oppose',zh:'反對'},{en:'overcome',zh:'克服'},
+            // P
+            {en:'perceive',zh:'感知'},{en:'persist',zh:'堅持'},{en:'precise',zh:'精確的'},{en:'predict',zh:'預測'},
+            {en:'prevent',zh:'防止'},{en:'primary',zh:'主要的'},{en:'promote',zh:'促進'},{en:'propose',zh:'提議'},
+            {en:'protect',zh:'保護'},{en:'provide',zh:'提供'},
+            // Q-R
+            {en:'quest',zh:'追求'},{en:'rational',zh:'理性的'},{en:'recognize',zh:'認識'},{en:'reduce',zh:'減少'},
+            {en:'reflect',zh:'反映'},{en:'resolve',zh:'解決'},{en:'restore',zh:'恢復'},{en:'reveal',zh:'揭示'},
+            // S
+            {en:'scarce',zh:'稀缺的'},{en:'sensitive',zh:'敏感的'},{en:'significant',zh:'重要的'},{en:'similar',zh:'相似的'},
+            {en:'specific',zh:'特定的'},{en:'stable',zh:'穩定的'},{en:'strengthen',zh:'加強'},{en:'sufficient',zh:'足夠的'},
+            {en:'suggest',zh:'建議'},{en:'support',zh:'支持'},{en:'sustain',zh:'維持'},
+            // T
+            {en:'tendency',zh:'趨勢'},{en:'thrive',zh:'茁壯'},{en:'transform',zh:'轉化'},{en:'typical',zh:'典型的'},
+            // U-V
+            {en:'unique',zh:'獨特的'},{en:'utilize',zh:'利用'},{en:'vague',zh:'模糊的'},{en:'vital',zh:'至關重要的'},
+            // W-Y
+            {en:'wander',zh:'漫遊'},{en:'widespread',zh:'廣泛的'},{en:'yearn',zh:'渴望'},
+            // Extra common words
+            {en:'able',zh:'能夠的'},{en:'accept',zh:'接受'},{en:'action',zh:'行動'},{en:'active',zh:'積極的'},
+            {en:'actual',zh:'實際的'},{en:'add',zh:'增加'},{en:'admit',zh:'承認'},{en:'agree',zh:'同意'},
+            {en:'allow',zh:'允許'},{en:'answer',zh:'回答'},{en:'argue',zh:'爭論'},{en:'avoid',zh:'避免'},
+            {en:'beautiful',zh:'美麗的'},{en:'believe',zh:'相信'},{en:'belong',zh:'屬於'},{en:'brave',zh:'勇敢的'},
+            {en:'break',zh:'打破'},{en:'build',zh:'建立'},{en:'calm',zh:'冷靜的'},{en:'capable',zh:'有能力的'},
+            {en:'careful',zh:'小心的'},{en:'cause',zh:'原因'},{en:'change',zh:'改變'},{en:'choose',zh:'選擇'},
+            {en:'clear',zh:'清楚的'},{en:'collect',zh:'收集'},{en:'common',zh:'普通的'},{en:'complete',zh:'完成'},
+            {en:'connect',zh:'連接'},{en:'continue',zh:'繼續'},{en:'control',zh:'控制'},{en:'create',zh:'創造'},
+            {en:'curious',zh:'好奇的'},{en:'decide',zh:'決定'},{en:'different',zh:'不同的'},{en:'difficult',zh:'困難的'},
+            {en:'discuss',zh:'討論'},{en:'divide',zh:'分割'},{en:'doubt',zh:'懷疑'},{en:'dream',zh:'夢想'},
+            {en:'eager',zh:'熱切的'},{en:'early',zh:'早期的'},{en:'earn',zh:'賺取'},{en:'easy',zh:'容易的'},
+            {en:'enjoy',zh:'享受'},{en:'equal',zh:'相等的'},{en:'expect',zh:'期待'},{en:'experience',zh:'經驗'},
+            {en:'explain',zh:'解釋'},{en:'explore',zh:'探索'},{en:'fail',zh:'失敗'},{en:'fair',zh:'公平的'},
+            {en:'faith',zh:'信念'},{en:'famous',zh:'著名的'},{en:'fear',zh:'恐懼'},{en:'feel',zh:'感覺'},
+            {en:'follow',zh:'跟隨'},{en:'force',zh:'力量'},{en:'forget',zh:'忘記'},{en:'forgive',zh:'原諒'},
+            {en:'free',zh:'自由的'},{en:'friend',zh:'朋友'},{en:'gain',zh:'獲得'},{en:'goal',zh:'目標'},
+            {en:'happy',zh:'快樂的'},{en:'help',zh:'幫助'},{en:'honest',zh:'誠實的'},{en:'honor',zh:'榮耀'},
+            {en:'hope',zh:'希望'},{en:'imagine',zh:'想像'},{en:'important',zh:'重要的'},{en:'increase',zh:'增加'},
+            {en:'inspire',zh:'激勵'},{en:'interest',zh:'興趣'},{en:'join',zh:'加入'},{en:'judge',zh:'判斷'},
+            {en:'kind',zh:'善良的'},{en:'large',zh:'大的'},{en:'learn',zh:'學習'},{en:'leave',zh:'離開'},
+            {en:'listen',zh:'聆聽'},{en:'live',zh:'生活'},{en:'long',zh:'長的'},{en:'lose',zh:'失去'},
+            {en:'love',zh:'愛'},{en:'loyal',zh:'忠誠的'},{en:'lucky',zh:'幸運的'},{en:'make',zh:'製作'},
+            {en:'mean',zh:'意思'},{en:'meet',zh:'遇見'},{en:'mind',zh:'心智'},{en:'move',zh:'移動'},
+            {en:'need',zh:'需要'},{en:'open',zh:'開放的'},{en:'order',zh:'順序'},{en:'patient',zh:'有耐心的'},
+            {en:'peace',zh:'和平'},{en:'plan',zh:'計劃'},{en:'practice',zh:'練習'},{en:'prepare',zh:'準備'},
+            {en:'prove',zh:'證明'},{en:'pure',zh:'純粹的'},{en:'reach',zh:'到達'},{en:'ready',zh:'準備好的'},
+            {en:'real',zh:'真實的'},{en:'reason',zh:'理由'},{en:'remember',zh:'記得'},{en:'respect',zh:'尊重'},
+            {en:'responsible',zh:'負責任的'},{en:'right',zh:'正確的'},{en:'rise',zh:'上升'},{en:'safe',zh:'安全的'},
+            {en:'save',zh:'拯救'},{en:'search',zh:'搜索'},{en:'serious',zh:'嚴肅的'},{en:'share',zh:'分享'},
+            {en:'simple',zh:'簡單的'},{en:'smart',zh:'聰明的'},{en:'solve',zh:'解決'},{en:'speak',zh:'說話'},
+            {en:'strong',zh:'強壯的'},{en:'study',zh:'學習'},{en:'success',zh:'成功'},{en:'surprise',zh:'驚喜'},
+            {en:'teach',zh:'教導'},{en:'think',zh:'思考'},{en:'trust',zh:'信任'},{en:'truth',zh:'真相'},
+            {en:'understand',zh:'理解'},{en:'unite',zh:'團結'},{en:'value',zh:'價值'},{en:'victory',zh:'勝利'},
+            {en:'wise',zh:'明智的'},{en:'wonder',zh:'驚奇'},{en:'work',zh:'工作'},{en:'worry',zh:'擔心'},
         ];
         const ANTONYMS = [
-            {word:'hot',ant:'cold'},{word:'fast',ant:'slow'},{word:'bright',ant:'dark'},
-            {word:'rich',ant:'poor'},{word:'happy',ant:'sad'},{word:'strong',ant:'weak'},
-            {word:'ancient',ant:'modern'},{word:'brave',ant:'cowardly'},{word:'expand',ant:'shrink'},
-            {word:'absorb',ant:'emit'},{word:'genuine',ant:'fake'},{word:'generous',ant:'stingy'},
+            {word:'hot',ant:'cold'},{word:'fast',ant:'slow'},{word:'bright',ant:'dark'},{word:'rich',ant:'poor'},
+            {word:'happy',ant:'sad'},{word:'strong',ant:'weak'},{word:'ancient',ant:'modern'},{word:'brave',ant:'cowardly'},
+            {word:'expand',ant:'shrink'},{word:'absorb',ant:'emit'},{word:'genuine',ant:'fake'},{word:'generous',ant:'stingy'},
+            {word:'success',ant:'failure'},{word:'increase',ant:'decrease'},{word:'accept',ant:'reject'},{word:'love',ant:'hate'},
+            {word:'begin',ant:'end'},{word:'create',ant:'destroy'},{word:'rise',ant:'fall'},{word:'early',ant:'late'},
+            {word:'easy',ant:'difficult'},{word:'clean',ant:'dirty'},{word:'safe',ant:'dangerous'},{word:'true',ant:'false'},
+            {word:'open',ant:'closed'},{word:'simple',ant:'complex'},{word:'loud',ant:'quiet'},{word:'shallow',ant:'deep'},
+            {word:'smooth',ant:'rough'},{word:'sharp',ant:'blunt'},{word:'major',ant:'minor'},{word:'push',ant:'pull'},
+            {word:'victory',ant:'defeat'},{word:'peace',ant:'war'},{word:'trust',ant:'doubt'},{word:'found',ant:'lost'},
+            {word:'add',ant:'subtract'},{word:'remember',ant:'forget'},{word:'lead',ant:'follow'},{word:'give',ant:'take'},
+            {word:'curious',ant:'indifferent'},{word:'flexible',ant:'rigid'},{word:'obvious',ant:'hidden'},{word:'agree',ant:'disagree'},
+            {word:'include',ant:'exclude'},{word:'encourage',ant:'discourage'},{word:'stable',ant:'unstable'},{word:'logical',ant:'irrational'},
+            {word:'specific',ant:'vague'},{word:'natural',ant:'artificial'},
         ];
         const SYNONYMS = [
-            {word:'happy',syn:'joyful'},{word:'fast',syn:'swift'},{word:'begin',syn:'start'},
-            {word:'angry',syn:'furious'},{word:'big',syn:'large'},{word:'smart',syn:'clever'},
-            {word:'tired',syn:'weary'},{word:'old',syn:'ancient'},{word:'strange',syn:'bizarre'},
-            {word:'brave',syn:'courageous'},{word:'quiet',syn:'silent'},{word:'shout',syn:'yell'},
+            {word:'happy',syn:'joyful'},{word:'fast',syn:'swift'},{word:'begin',syn:'start'},{word:'angry',syn:'furious'},
+            {word:'big',syn:'large'},{word:'smart',syn:'clever'},{word:'tired',syn:'weary'},{word:'old',syn:'ancient'},
+            {word:'strange',syn:'bizarre'},{word:'brave',syn:'courageous'},{word:'quiet',syn:'silent'},{word:'shout',syn:'yell'},
+            {word:'beautiful',syn:'gorgeous'},{word:'tiny',syn:'miniature'},{word:'rich',syn:'wealthy'},{word:'afraid',syn:'terrified'},
+            {word:'laugh',syn:'chuckle'},{word:'talk',syn:'speak'},{word:'walk',syn:'stroll'},{word:'hurt',syn:'injure'},
+            {word:'find',syn:'discover'},{word:'help',syn:'assist'},{word:'show',syn:'display'},{word:'use',syn:'utilize'},
+            {word:'make',syn:'create'},{word:'need',syn:'require'},{word:'think',syn:'ponder'},{word:'want',syn:'desire'},
+            {word:'give',syn:'provide'},{word:'change',syn:'alter'},{word:'keep',syn:'maintain'},{word:'stop',syn:'cease'},
+            {word:'allow',syn:'permit'},{word:'try',syn:'attempt'},{word:'choose',syn:'select'},{word:'answer',syn:'respond'},
+            {word:'explain',syn:'clarify'},{word:'grow',syn:'expand'},{word:'break',syn:'shatter'},{word:'gather',syn:'collect'},
+            {word:'suggest',syn:'propose'},{word:'improve',syn:'enhance'},{word:'protect',syn:'defend'},{word:'support',syn:'back'},
+            {word:'believe',syn:'trust'},{word:'seem',syn:'appear'},{word:'look',syn:'observe'},{word:'build',syn:'construct'},
+            {word:'solve',syn:'resolve'},{word:'achieve',syn:'accomplish'},
         ];
         const SENTENCES = [
             {words:['The','cat','sat','on','the','mat'], answer:'The cat sat on the mat'},
@@ -4588,6 +4900,20 @@ document.addEventListener('DOMContentLoaded', () => {
             {words:['They','went','to','the','park'], answer:'They went to the park'},
             {words:['I','enjoy','learning','new','words'], answer:'I enjoy learning new words'},
             {words:['The','sun','rises','in','the','east'], answer:'The sun rises in the east'},
+            {words:['We','should','always','tell','the','truth'], answer:'We should always tell the truth'},
+            {words:['Practice','makes','perfect'], answer:'Practice makes perfect'},
+            {words:['She','is','very','kind','and','helpful'], answer:'She is very kind and helpful'},
+            {words:['Hard','work','leads','to','success'], answer:'Hard work leads to success'},
+            {words:['The','children','played','in','the','garden'], answer:'The children played in the garden'},
+            {words:['Music','can','make','people','happy'], answer:'Music can make people happy'},
+            {words:['He','forgot','to','bring','his','umbrella'], answer:'He forgot to bring his umbrella'},
+            {words:['Learning','a','new','language','takes','time'], answer:'Learning a new language takes time'},
+            {words:['The','dog','chased','the','ball'], answer:'The dog chased the ball'},
+            {words:['She','smiled','and','waved','goodbye'], answer:'She smiled and waved goodbye'},
+            {words:['They','worked','together','as','a','team'], answer:'They worked together as a team'},
+            {words:['The','sky','turned','orange','at','sunset'], answer:'The sky turned orange at sunset'},
+            {words:['He','studied','hard','and','passed','the','exam'], answer:'He studied hard and passed the exam'},
+            {words:['Kindness','is','the','best','gift'], answer:'Kindness is the best gift'},
         ];
         const IDIOMS = [
             {hint:'行動勝於言語', idiom:'Actions speak louder than words'},
@@ -4858,10 +5184,13 @@ document.addEventListener('DOMContentLoaded', () => {
         //  GAME 6 – Word Typer (計時打字)
         // ============================================================
         function game_wordtyper() {
-            let score=0, timeLeft=30, timer, items=shuffle(VOCAB), idx=0, active=false;
+            let score=0, timeLeft=30, timer=null, items=shuffle(VOCAB), idx=0, active=false;
             function start() {
+                if(timer) clearInterval(timer);
                 active=true; score=0; idx=0; timeLeft=30; items=shuffle(VOCAB);
-                timer=setInterval(()=>{ timeLeft--; update(); if(timeLeft<=0){ clearInterval(timer); end(); } },1000);
+                timer=setInterval(()=>{ timeLeft--; update(); if(timeLeft<=0){ clearInterval(timer); timer=null; end(); } },1000);
+                // 登記清除函數，離開遊戲時自動停止
+                _gameCleanup = () => { if(timer){ clearInterval(timer); timer=null; } active=false; };
                 render();
             }
             function end() {
@@ -5168,20 +5497,28 @@ document.addEventListener('DOMContentLoaded', () => {
         //  GAME 13 – Letter Fall (字母雨)
         // ============================================================
         function game_letterfall() {
-            let target, typed='', score=0, lives=3, speed=3000, interval, gameOver=false;
+            let target, typed='', score=0, lives=3, speed=3000, interval=null, gameOver=false;
+            // 登記清除函數
+            _gameCleanup = () => {
+                gameOver=true;
+                if(interval){ clearTimeout(interval); interval=null; }
+                document.onkeydown = null;
+            };
             function next() {
                 target=pick(VOCAB); typed='';
                 render();
-                clearTimeout(interval);
+                if(interval) clearTimeout(interval);
                 interval=setTimeout(()=>{ if(!gameOver){ lives--; if(lives<=0) end(); else next(); } },speed);
             }
             function end() {
-                gameOver=true; clearTimeout(interval);
+                gameOver=true;
+                if(interval){ clearTimeout(interval); interval=null; }
+                document.onkeydown = null;
                 gameContainer.innerHTML='';
                 const card=gc('text-align:center;display:flex;flex-direction:column;gap:16px;align-items:center;');
                 card.innerHTML=`<div style="font-size:48px;">💀</div><div style="font-size:24px;font-weight:800;color:#f87171;">遊戲結束！得分：${score}</div>`;
                 const rb=mkBtn('再玩一次','background:rgba(59,130,246,0.3);border:1px solid #3b82f6;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-weight:700;');
-                rb.onclick=()=>{ gameOver=false; score=0; lives=3; speed=3000; next(); };
+                rb.onclick=()=>{ gameOver=false; score=0; lives=3; speed=3000; if(interval){clearTimeout(interval);interval=null;} next(); };
                 card.appendChild(rb); gameContainer.appendChild(card);
             }
             function render() {
@@ -5208,9 +5545,37 @@ document.addEventListener('DOMContentLoaded', () => {
             const LETTERS='t,r,a,e,i,n,g,o'.split(',');
             const ALL_LETTERS=[CENTER,...LETTERS];
             // Pre-known valid words for these letters
-            const VALID=['star','rain','sing','ring','earn','grin','gain','train','groan','stair','grains','reign','string','strain','strange','ingot','tore','store','snore','stone','noter','tenor'];
+        // Word wheel validation: check against WORD_BANK instead of fixed list
+        const VALID_WHEEL_EXTRA=['star','rain','sing','ring','earn','grin','gain','train','groan','stair',
+            'grains','reign','string','strain','strange','ingot','tore','store','snore','stone','noter','tenor',
+            'ringo','siren','tiger','tiger','stern','stein','inert','inter','tinge','reign','nitro','oaring',
+            'soaring','storing','stoning','staring','roasting','organist','groaning','girasol','negator','gainsort',
+            'origin','ration','orator','griot','nadir','irone','noria','senor','snore','snort','toner','noter',
+            'enroot','inrode','ornate','ration','nation','orates','oaters','iranes','stoner','toners','noters',
+            'nestor','orison','onsite','Senior','stogie','goiters','goaners','otaries','notaries','signore',
+            'agonist','transistor','ant','are','art','ate','ear','eat','era','ire','oar','ore','rat','ran',
+            'roe','rot','rote','sane','sang','sari','sate','saga','saga','sage','ego','ego','ego','ogre',
+            'age','ago','sir','sit','tie','toe','ton','too','tor','ore','one','ion','inn','gin','git',
+            'tan','tin','ten','net','not','nor','nit','nag','nae','ire','ire','ors','ors','one',
+            'ears','eats','eons','eros','etna','giro','gore','gores','goes','gone','goner','gain','gait',
+            'gate','gorse','goers','groan','grains','groin','groins','grin','grins','grins','groin','gross',
+            'stoic','sonic','sonic','scion','arose','arson','tonic','tonier','ironer','soring','rosin',
+            'ostia','oaters','goiter','goiters','inters','inserting','oranges','soaring'];
             let found=new Set(), current='';
-            function isValid(w) { if(w.length<3||!w.includes(CENTER)) return false; const avail=[...ALL_LETTERS]; for(const c of w){ const i=avail.indexOf(c); if(i<0) return false; avail.splice(i,1); } return VALID.includes(w.toLowerCase()); }
+            function isValid(w) { 
+                if(w.length<3||!w.toLowerCase().includes(CENTER)) return false; 
+                const avail=[...ALL_LETTERS]; 
+                for(const c of w.toLowerCase()){ const i=avail.indexOf(c); if(i<0) return false; avail.splice(i,1); } 
+                return true; // letter combo valid; API will verify it's a real word
+            }
+            async function isRealEnglishWord(w) {
+                if(VALID_WHEEL_EXTRA.includes(w.toLowerCase())) return true;
+                if(WORD_BANK.includes(w.toLowerCase())) return true;
+                try {
+                    const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(w)}`);
+                    return r.ok;
+                } catch(e) { return true; } // be lenient on network error
+            }
             function render() {
                 gameContainer.innerHTML='';
                 const card=gc('display:flex;flex-direction:column;gap:14px;align-items:center;');
@@ -5233,11 +5598,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 gameContainer.appendChild(card);
             }
             window.wheelClick=(l)=>{ current+=l; document.getElementById('currentWord').textContent=current.toUpperCase(); };
-            window.wheelSubmit=()=>{
+            window.wheelSubmit=async ()=>{
                 const fb=document.getElementById('wheelFeedback');
-                if(found.has(current.toLowerCase())){ fb.innerHTML='<span style="color:#fbbf24">已找過這個！</span>'; }
-                else if(isValid(current.toLowerCase())){ found.add(current.toLowerCase()); current=''; render(); }
-                else { fb.innerHTML='<span style="color:#f87171">不是有效單字或不包含中間字母</span>'; setTimeout(()=>{ if(fb) fb.innerHTML=''; },1000); current=''; document.getElementById('currentWord').textContent='...'; }
+                const w=current.toLowerCase();
+                if(found.has(w)){ fb.innerHTML='<span style="color:#fbbf24">已找過這個！</span>'; return; }
+                if(!isValid(w)){ fb.innerHTML='<span style="color:#f87171">字母組合不符，必須包含中間字母</span>'; setTimeout(()=>{ if(fb) fb.innerHTML=''; },1000); current=''; document.getElementById('currentWord').textContent='...'; return; }
+                fb.innerHTML='<span style="color:#94a3b8">驗證中...</span>';
+                const valid = await isRealEnglishWord(w);
+                if(valid){ found.add(w); current=''; render(); }
+                else { fb.innerHTML='<span style="color:#f87171">不是有效的英文單字！</span>'; setTimeout(()=>{ if(fb) fb.innerHTML=''; },1200); current=''; document.getElementById('currentWord').textContent='...'; }
             };
             window.wheelClear=()=>{ current=''; document.getElementById('currentWord').textContent='...'; };
             render();
@@ -5430,7 +5799,71 @@ document.addEventListener('DOMContentLoaded', () => {
         //  GAME 19 – Word Chain (單字接龍)
         // ============================================================
         function game_wordchain() {
-            const WORD_BANK=['apple','elephant','tiger','rabbit','tree','eagle','eye','ear','run','night','time','error','rose','end','dog','great','top','pen','nose','eat','tap','planet','test','talk'];
+        const WORD_BANK=['a','abandon','able','about','above','accept','across','act','add','admit','after','again',
+            'age','ago','agree','air','all','allow','almost','alone','along','already','also','always','am','among','an',
+            'and','angry','animal','another','any','apart','apply','are','area','arm','around','as','ask','at','ate',
+            'away','back','bad','ball','ban','band','base','be','bean','bear','beat','because','become','before','begin',
+            'bend','best','big','bike','bird','black','blue','boat','body','bone','book','bore','both','box','boy','brain',
+            'break','bright','bring','broad','but','by','cage','calm','came','can','cap','car','card','care','carry',
+            'case','cat','cave','change','chest','child','chin','city','clean','clear','climb','clock','close','cloud',
+            'coat','cold','come','cook','cool','copy','core','corn','could','count','cover','cross','cry','cup','cute',
+            'dad','dark','date','day','deal','dear','deep','deny','did','die','dig','dim','dish','do','dog','done',
+            'door','down','draw','dream','drink','drive','drop','dry','duck','dull','dumb','each','ear','earn','east',
+            'easy','eat','edge','eight','else','end','enjoy','even','ever','evil','eye','face','fall','fan','far',
+            'fast','fat','fear','feel','fell','felt','fill','find','fine','fish','fit','five','flat','fly','foam','fog',
+            'fold','fond','food','foot','for','force','form','free','from','front','full','fun','gave','get','give',
+            'glad','go','goal','good','got','great','green','grin','grip','grow','gulf','gun','hand','hang','happen',
+            'hard','harm','hat','hate','have','head','hear','heat','help','hero','hide','high','hill','him','hit',
+            'hold','hole','home','hope','hot','how','huge','hurt','idea','if','ill','into','joy','jump','just','keep',
+            'kind','king','know','land','large','last','late','lead','lean','learn','left','less','let','life','light',
+            'like','lip','list','live','long','look','loop','low','make','mark','mean','meet','mess','mind','miss',
+            'mix','mode','moon','more','most','move','much','must','name','near','need','nest','next','nice','night',
+            'nod','nor','nose','not','note','now','once','only','open','out','over','own','page','part','pass','past',
+            'path','peak','pick','pile','pine','pink','play','plus','point','poor','post','pull','push','put','quit',
+            'race','rain','read','red','rest','rice','ride','ring','rise','rock','role','roll','roof','root','rose',
+            'rule','run','rush','safe','said','sand','sang','save','sea','seed','self','sell','send','set','shed',
+            'ship','shoe','shop','shot','show','side','sign','sing','skin','sky','sleep','slim','slow','small','smell',
+            'snap','snow','sock','soft','soil','sold','some','song','soon','soul','spin','star','stay','step','stir',
+            'stop','store','such','suit','sure','swim','tail','take','tall','task','tear','tell','then','they','thin',
+            'this','time','told','tone','too','took','top','town','tree','trim','trip','true','try','turn','type',
+            'unit','until','upon','used','very','view','warm','wash','wave','way','wear','week','went','were','what',
+            'when','wide','wild','will','wind','wine','wing','wish','with','wolf','wood','word','wore','world','wrap',
+            'year','your','zero','zone','able','acid','aged','also','area','army','away','baby','back','ball','band',
+            'bank','base','bath','bear','beat','been','bell','best','bite','blow','blue','boat','bomb','bond','bone',
+            'book','boom','born','boss','both','bowl','bulk','burn','busy','cafe','calm','camp','card','care','case',
+            'cash','cast','cell','chat','chef','chin','chip','clan','clay','clip','club','coal','code','coil','coin',
+            'coke','cola','come','cork','cost','coup','crew','crop','cure','curl','damp','dare','dark','dart','dash',
+            'data','debt','deck','deed','deny','desk','diet','dip','dirt','disk','dope','dose','duel','duke','dumb',
+            'dump','dusk','dust','duty','each','earn','ease','edge','emit','exam','exit','expo','fade','fail','fake',
+            'fame','farm','feat','feed','feel','feet','felt','fend','fest','file','fill','film','fir','firm','fist',
+            'flag','flaw','flea','fled','flew','flip','foe','folk','fond','fool','form','fort','foul','four','fuel',
+            'gain','gale','gaze','gear','gene','gift','girl','glow','glue','gone','gown','grab','grad','gram','gray',
+            'grew','grid','grin','grip','grit','gulf','gust','hack','hail','half','hall','halt','hand','harm','haze',
+            'heal','heap','helm','herd','hero','hike','hill','hint','hire','hive','hold','hood','hook','horn','host',
+            'huge','hull','hump','hunt','idol','inch','item','jail','jest','join','joke','jolt','junk','jury','keen',
+            'kick','kill','knot','lack','laid','lake','lamp','lark','lash','last','laud','lawn','leak','left','lens',
+            'levy','lick','limp','lion','load','loan','lock','logo','lore','lure','lurk','mace','magic','main','mall',
+            'malt','mare','mark','mash','mask','mast','mate','math','maze','meal','meat','melt','memo','menu','mesh',
+            'mild','milk','mill','mist','mitt','moat','mob','mock','mold','monk','mood','moor','mope','mow','muck',
+            'mug','mule','nab','nap','navy','need','neon','newt','nick','nil','nip','node','nook','norm','numb',
+            'oaks','oath','obey','odds','omen','once','oral','orb','oval','pace','pact','paid','pail','pain','pair',
+            'pale','palm','pane','park','pave','pawn','peak','peel','peer','pest','pier','pile','pill','pipe','pit',
+            'plan','plea','plug','plum','plunge','poem','poll','pond','pool','pore','pose','pour','pray','prey','prim',
+            'prob','probe','prod','prop','prow','prowl','puff','pulp','pump','pure','purr','quay','rack','rage','rail',
+            'rake','ramp','rank','rant','rash','realm','reel','reef','rein','rely','rend','rent','reek','reply','rift',
+            'riot','roam','roar','rob','robe','rod','rogue','ruin','ruse','rust','rut','sack','saga','sage','sake',
+            'sash','scar','screw','seam','sect','seer','self','serf','sham','shin','shun','silk','sill','silt','siren',
+            'skew','slab','slap','slay','slim','slip','slot','slug','slur','smash','smear','smelt','smug','sob','sod',
+            'sole','solve','soot','sore','span','spar','spawn','spec','spell','spit','slab','spun','spy','squall',
+            'stab','stale','stall','stark','start','stash','steal','steam','stem','sting','stink','stint','stir',
+            'stock','stole','stomp','stout','straw','strip','strut','stub','stud','stun','stunt','sub','sung','sunk',
+            'swam','swap','swear','swept','swift','swipe','swirl','swoon','tab','tack','tame','tank','taps','tare',
+            'tart','taut','teat','tech','text','that','them','thick','thud','thug','tier','tint','tire','toad','toil',
+            'toll','torch','tore','torn','toss','tour','tow','tram','trap','tread','trek','trend','trick','trim',
+            'truce','truly','tuck','tuft','tug','tulip','tune','tung','turf','tusk','tutor','tweed','undo','urge',
+            'vast','veal','veil','vein','vent','vest','vice','vine','void','volt','vow','wail','wait','wake','wane',
+            'ward','wart','wasp','watt','wedge','weld','welt','wend','whim','whip','wick','wilt','wimp','wink','wipe',
+            'wire','woe','woke','womb','woo','wore','wren','wring','writ','yell','yelp','yoga','yoke'];
             let chain=[], usedWords=new Set(), score=0;
             chain.push('START');
             function getLastChar() { return chain[chain.length-1].slice(-1).toLowerCase(); }
@@ -5460,7 +5893,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(!w){ return; }
                     if(w[0]!==getLastChar()){ fb.appendChild(feedback(`❌ 必須以 "${getLastChar().toUpperCase()}" 開頭！`,false)); inp.value=''; return; }
                     if(usedWords.has(w)){ fb.appendChild(feedback('❌ 已使用過這個單字！',false)); inp.value=''; return; }
-                    if(!WORD_BANK.includes(w)){ fb.appendChild(feedback('❌ 找不到這個單字，試試其他的！',false)); inp.value=''; return; }
+                    // Validate word: check WORD_BANK first, then free-dictionary API
+                    const inBank = WORD_BANK.includes(w);
+                    if(!inBank) {
+                        // Try API validation asynchronously
+                        fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(w)}`)
+                            .then(r => r.ok ? r.json() : null)
+                            .then(data => {
+                                if(data && data[0] && data[0].word) {
+                                    // Valid word - proceed
+                                    usedWords.add(w); chain.push(w); score=chain.length-1; inp.value=''; render();
+                                } else {
+                                    fb.appendChild(feedback('❌ 不是有效的英文單字！',false));
+                                    inp.value=''; inp.focus();
+                                }
+                            })
+                            .catch(()=>{ 
+                                // Network error - be lenient, allow word
+                                usedWords.add(w); chain.push(w); score=chain.length-1; inp.value=''; render();
+                            });
+                        return;
+                    }
                     usedWords.add(w); chain.push(w); score=chain.length-1; inp.value=''; render();
                 }
                 sub.onclick=check; inp.onkeydown=e=>{ if(e.key==='Enter') check(); };
@@ -5474,17 +5927,31 @@ document.addEventListener('DOMContentLoaded', () => {
         //  GAME 20 – Word Ladder (單字梯)
         // ============================================================
         function game_wordladder() {
-            const LADDERS=[
-                {start:'cat',end:'dog',steps:['cat','bat','bad','bag','big','bid','did','dig','dog'], hint:'cat → dog'},
-                {start:'cold',end:'warm',steps:['cold','cord','word','ward','warm'], hint:'cold → warm'},
-                {start:'head',end:'tail',steps:['head','bead','beat','belt','bell','ball','tall','tail'], hint:'head → tail'},
-            ];
+        const LADDERS=[
+            {start:'cat',end:'dog',valid:['cat','bat','bad','bag','big','bid','did','dig','dog','cot','got','god','fat','fan','can','cap','cab','lab','lap','map','mad','mid','mud','bud','bug','dug','dug','fog']},
+            {start:'cold',end:'warm',valid:['cold','cord','word','ward','warm','bold','told','toll','tall','talk','walk','wall','well','bell','belt','melt','felt','fall','ball','call','hall','hold','gold','goad','road','load','lead','read','head','heal','real','meal','seal','deal','teal','tear','wear','year','hear','heat','seat','neat','meat','beat','bean','lean','mean','team','tram','trap','wrap','warp']},
+            {start:'head',end:'tail',valid:['head','bead','beat','belt','bell','ball','tall','tail','heat','meat','meal','teal','tell','sell','seal','real','deal','lead','load','road','toad','told','bold','gold','hold','hole','mole','role','rule','rile','tile','time','lime','line','wine','mine','pine','pint','hint','mint','mist','fist','fish','dish','wish','wisp','wasp','last','mast','past','fast','cast','cost','lost','loft','left','lest','best','rest','rust','gust','dust']},
+            {start:'hot',end:'cold',valid:['hot','cot','cat','bat','bad','bid','bud','cold','hog','log','lag','bag','ban','can','cap','cop','cob','cod','cog','con','cot','dot','fog','got','god','lot','nod','not','pod','pot','rod','rot','sob','sod','tog','top','tot']},
+            {start:'more',end:'less',valid:['more','bore','core','care','dare','hare','bare','base','case','lace','face','pace','race','rase','rise','wise','wide','ride','side','tide','hide','hire','fire','fare','hare','hale','tale','male','pale','sale','sole','mole','hole','role','rose','nose','note','vote','vole','lore','lore','loss','toss','boss','moss','less','mess','best','rest','test','text','next','nest','rest','jest','vest','west']},
+            {start:'love',end:'hate',valid:['love','live','line','lime','like','bike','bite','site','sate','late','mate','gate','rate','date','fate','hate','have','cave','gave','cove','dove','done','bone','bane','lane','lame','game','same','sale','tale','male','pale','sale','sole','mole','hole','role','rose','nose','note','vote','dote','dome','home','come','came','game','fame']},
+            {start:'win',end:'lose',valid:['win','bin','bit','bat','cat','car','bar','far','fat','lot','log','lag','bag','ban','can','cap','cop','dot','fog','got','god','hot','lot','not','pod','pot','rod','rot','sob','sod','ton','top','rot','rose','nose','note','vote','lore','loss','toss','boss','moss','lose']},
+            {start:'day',end:'night',valid:['day','say','sat','pat','pit','pig','big','bid','rid','rim','rip','tip','tin','tan','ran','run','rut','nut','gut','cut','cup','pup','pub','sub','sun','bun','nun','nun','gun','fun','fan','can','ban','bat','cat','cot','not','hot','hop','top','tip','dip','dim','him','hit','sit','six','mix','fix','fit','kit','knit','grit','grip','drip','drip','trip','trim','tram','gram','grab','crab','crabs','grabs']},
+            {start:'fire',end:'ice',valid:['fire','hire','hike','bike','like','lime','time','tide','side','site','bite','kite','mite','mice','rice','rice','dice','nice','vice','vice','ice']},
+            {start:'black',end:'white',valid:['black','slack','slick','click','clock','block','blink','brink','drink','drunk','trunk','trink','trick','track','crack','crick','price','priced','priced','grace','place','plate','plane','plant','slant','slang','clang','clank','blank','bland','blend','blond','blood','flood','floor','flour','fluor','flute','flute','flute','fluke','flume','plume','plumb','thumb','thump','stump','stamp','tramp','cramp','clamp','clamp','clam','claim','flail','frail','trail','train','grain','grail','grail']},
+        ];
             const puzzle=pick(LADDERS);
-            const maxSteps=puzzle.steps.length-1;
+            const maxSteps=puzzle.valid ? Math.floor(puzzle.valid.length/3) : 6;
             let current=puzzle.start, path=[puzzle.start], stepCount=0;
             function isOneLetterAway(a,b){ if(a.length!==b.length) return false; let diff=0; for(let i=0;i<a.length;i++) if(a[i]!==b[i]) diff++; return diff===1; }
-            function isRealWord(w){ return puzzle.steps.includes(w)||['the','and','but','for','hat','bat','bad','bag','bid','did','dig','bead','beat','belt','bell','ball','tall','cord','word','ward'].includes(w); }
-            function render() {
+            function isRealWord(w){ return puzzle.valid ? puzzle.valid.includes(w) : WORD_BANK.includes(w); }
+            function finishLadder() {
+                setScore(`🏆 完成！共 ${stepCount} 步（最優：${maxSteps} 步）`);
+                gameContainer.innerHTML=''; const c=gc('text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;');
+                c.innerHTML=`<div style="font-size:40px;">🏆</div><div style="font-size:22px;font-weight:800;color:#34d399;">${puzzle.start.toUpperCase()} → ${puzzle.end.toUpperCase()} 完成！</div><div style="font-size:16px;color:#fbbf24;">${stepCount} 步完成（最優解：${maxSteps} 步）</div>`;
+                const rb=mkBtn('換一題','background:rgba(59,130,246,0.3);border:1px solid #3b82f6;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-weight:700;');
+                rb.onclick=game_wordladder; c.appendChild(rb); gameContainer.appendChild(c);
+            }
+                        function render() {
                 gameContainer.innerHTML='';
                 const card=gc('display:flex;flex-direction:column;gap:14px;align-items:center;');
                 card.innerHTML=`
@@ -5505,16 +5972,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     const fb=card.querySelector('#ladderFeedback');
                     if(w.length!==puzzle.start.length){ fb.appendChild(feedback(`❌ 必須是 ${puzzle.start.length} 個字母的單字`,false)); inp.value=''; return; }
                     if(!isOneLetterAway(current,w)){ fb.appendChild(feedback('❌ 只能改變一個字母！',false)); inp.value=''; return; }
-                    if(!isRealWord(w)){ fb.appendChild(feedback('❌ 不是有效的英文單字！',false)); inp.value=''; return; }
-                    stepCount++; current=w; path.push(w); inp.value='';
-                    if(w===puzzle.end){
-                        setScore(`🏆 完成！共 ${stepCount} 步（最優：${maxSteps} 步）`);
-                        gameContainer.innerHTML=''; const c=gc('text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;');
-                        c.innerHTML=`<div style="font-size:40px;">🏆</div><div style="font-size:22px;font-weight:800;color:#34d399;">${puzzle.start.toUpperCase()} → ${puzzle.end.toUpperCase()} 完成！</div><div style="font-size:16px;color:#fbbf24;">${stepCount} 步完成（最優解：${maxSteps} 步）</div>`;
-                        const rb=mkBtn('換一題','background:rgba(59,130,246,0.3);border:1px solid #3b82f6;color:#fff;padding:10px 24px;border-radius:10px;cursor:pointer;font-weight:700;');
-                        rb.onclick=game_wordladder; c.appendChild(rb); gameContainer.appendChild(c);
+                    if(!isRealWord(w)){
+                        // Fallback to API
+                        card.querySelector('#ladderSubmit').disabled=true;
+                        fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(w)}`)
+                            .then(r=>r.ok?r.json():null)
+                            .then(data=>{
+                                card.querySelector('#ladderSubmit').disabled=false;
+                                if(!data||!data[0]){ fb.appendChild(feedback('❌ 不是有效的英文單字！',false)); inp.value=''; return; }
+                                stepCount++; current=w; path.push(w); inp.value='';
+                                if(w===puzzle.end){ finishLadder(); } else render();
+                            })
+                            .catch(()=>{ card.querySelector('#ladderSubmit').disabled=false; stepCount++; current=w; path.push(w); inp.value=''; if(w===puzzle.end){ finishLadder(); } else render(); });
                         return;
                     }
+                    stepCount++; current=w; path.push(w); inp.value='';
+                    if(w===puzzle.end){ finishLadder(); return; }
                     render();
                 }
                 card.querySelector('#ladderSubmit').onclick=check;
@@ -5537,7 +6010,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div style="width:${pct}%;height:100%;background:${pct>=80?'#34d399':pct>=50?'#fbbf24':'#f87171'};border-radius:5px;"></div>
                 </div>`;
             const rb=mkBtn('再玩一次 ↺','background:rgba(139,92,246,0.3);border:1px solid #8b5cf6;color:#fff;padding:12px 28px;border-radius:12px;cursor:pointer;font-size:16px;font-weight:700;');
-            rb.onclick=()=>{ gameMenuView.style.display='block'; gamePlayView.style.display='none'; setScore(''); currentGameTitle.textContent=''; };
+            rb.onclick=()=>{ cleanupCurrentGame(); gameMenuView.style.display='block'; gamePlayView.style.display='none'; setScore(''); currentGameTitle.textContent=''; };
             card.appendChild(rb);
             gameContainer.appendChild(card);
         }
@@ -5675,6 +6148,291 @@ document.addEventListener('DOMContentLoaded', () => {
         installBanner.style.display = 'none';
         deferredPrompt = null;
     });
+
+    // ── 即時浮動查字典（完整版）────────────────────────────────────
+    (function() {
+        const popup   = document.getElementById('floatDictPopup');
+        if (!popup) return;
+        const popWord  = document.getElementById('floatDictWord');
+        const popIpa   = document.getElementById('floatDictIpa');
+        const popLoad  = document.getElementById('floatDictLoading');
+        const popBody  = document.getElementById('floatDictBody');
+        const popErr   = document.getElementById('floatDictError');
+        const popAudio = document.getElementById('floatDictAudio');
+        const popClose = document.getElementById('floatDictClose');
+        let currentAudioUrl = null;
+
+        // 內建常用字中文對照（補充 API 沒有中文的問題）
+        const CHI_MAP = {
+            abandon:'放棄',able:'能夠的',abundant:'豐富的',achieve:'達成',acquire:'獲得',
+            adapt:'適應',add:'增加',admit:'承認',affect:'影響',affirm:'肯定',
+            afford:'負擔得起',agree:'同意',alert:'警覺',allow:'允許',alter:'改變',
+            ambiguous:'模糊的',analyze:'分析',ancient:'古老的',angry:'生氣的',anxious:'焦慮的',
+            approach:'方法/接近',approve:'批准',argue:'爭論',assert:'聲稱',assist:'協助',
+            assume:'假設',attempt:'嘗試',avoid:'避免',aware:'意識到的',
+            barrier:'障礙',beautiful:'美麗的',believe:'相信',benefit:'利益',big:'大的',
+            blunt:'直率的',boost:'提升',brave:'勇敢的',break:'打破',brief:'簡短的',
+            brilliant:'傑出的',build:'建立',burden:'負擔',
+            calm:'冷靜的',capable:'有能力的',capture:'捕獲',careful:'小心的',cause:'原因',
+            challenge:'挑戰',change:'改變',choose:'選擇',chronic:'慢性的',clarify:'澄清',
+            clear:'清楚的',collapse:'崩潰',commit:'承諾',common:'普通的',complete:'完成',
+            complex:'複雜的',conceal:'隱藏',concept:'概念',concern:'擔憂',confirm:'確認',
+            conflict:'衝突',consider:'考慮',constant:'持續的',construct:'建造',
+            contrary:'相反的',convince:'說服',cooperate:'合作',courage:'勇氣',
+            create:'創造',creative:'創意的',critical:'批判的',crucial:'關鍵的',curious:'好奇的',
+            decide:'決定',decline:'下降',dedicate:'致力於',define:'定義',delay:'延誤',
+            deliver:'傳遞',depend:'依賴',describe:'描述',desire:'渴望',despite:'儘管',
+            detect:'偵測',determine:'決定',devote:'奉獻',different:'不同的',difficult:'困難的',
+            diminish:'減少',discover:'發現',discuss:'討論',display:'展示',distinct:'明顯的',
+            divide:'分割',dominate:'支配',doubt:'懷疑',dream:'夢想',durable:'耐用的',
+            eager:'熱切的',earn:'賺取',easy:'容易的',effective:'有效的',efficient:'有效率的',
+            emerge:'出現',enhance:'增強',enjoy:'享受',enormous:'巨大的',ensure:'確保',
+            equal:'相等的',essential:'必要的',establish:'建立',evaluate:'評估',evolve:'進化',
+            exceed:'超越',exclude:'排除',exhaust:'耗盡',expand:'擴展',expect:'期待',
+            experience:'經驗',explain:'解釋',explore:'探索',expose:'暴露',express:'表達',
+            facilitate:'促進',fail:'失敗',fair:'公平的',faith:'信念',famous:'著名的',
+            fast:'快速的',fear:'恐懼',feel:'感覺',flexible:'靈活的',flourish:'繁盛',
+            focus:'專注',follow:'跟隨',force:'力量',forget:'忘記',forgive:'原諒',
+            fragile:'脆弱的',free:'自由的',frequent:'頻繁的',fulfill:'履行',
+            gain:'獲得',generate:'產生',genuine:'真實的',goal:'目標',govern:'管治',
+            grateful:'感激的',guarantee:'保證',happy:'快樂的',help:'幫助',
+            hesitate:'猶豫',highlight:'突出',honest:'誠實的',honor:'榮耀',hope:'希望',
+            humble:'謙遜的',identify:'識別',ignore:'忽視',illustrate:'說明',impact:'影響',
+            imply:'暗示',important:'重要的',improve:'改善',indicate:'表示',influence:'影響',
+            inspire:'激勵',intense:'強烈的',interpret:'解釋',involve:'涉及',
+            join:'加入',judge:'判斷',justify:'辯護',keen:'渴望的',kind:'善良的',
+            knowledge:'知識',large:'大的',learn:'學習',leave:'離開',liberal:'自由的',
+            limited:'有限的',linger:'徘徊',listen:'聆聽',live:'生活',logical:'合理的',
+            love:'愛',loyal:'忠誠的',lucky:'幸運的',maintain:'維持',manage:'管理',
+            migrate:'遷移',mind:'心智',moderate:'適度的',monitor:'監控',motivate:'激勵',
+            neutral:'中立的',notion:'概念',numerous:'眾多的',obstacle:'障礙物',
+            obvious:'明顯的',obtain:'獲得',occur:'發生',open:'開放的',oppose:'反對',
+            overcome:'克服',patient:'有耐心的',peace:'和平',perceive:'感知',persist:'堅持',
+            plan:'計劃',practice:'練習',precise:'精確的',predict:'預測',prepare:'準備',
+            prevent:'防止',promote:'促進',protect:'保護',proud:'驕傲的',prove:'證明',
+            provide:'提供',pure:'純粹的',quest:'追求',rational:'理性的',reach:'到達',
+            ready:'準備好的',reason:'理由',recognize:'認識',reduce:'減少',reflect:'反映',
+            remember:'記得',resolve:'解決',respect:'尊重',responsible:'負責任的',
+            restore:'恢復',reveal:'揭示',rise:'上升',safe:'安全的',save:'拯救',
+            scarce:'稀缺的',search:'搜索',sensitive:'敏感的',serious:'嚴肅的',share:'分享',
+            significant:'重要的',similar:'相似的',simple:'簡單的',smart:'聰明的',
+            solve:'解決',speak:'說話',specific:'特定的',stable:'穩定的',strengthen:'加強',
+            study:'學習',success:'成功',sufficient:'足夠的',suggest:'建議',support:'支持',
+            surprise:'驚喜',sustain:'維持',teach:'教導',tendency:'趨勢',think:'思考',
+            thrive:'茁壯',transform:'轉化',trust:'信任',truth:'真相',typical:'典型的',
+            understand:'理解',unite:'團結',unique:'獨特的',utilize:'利用',vague:'模糊的',
+            value:'價值',victory:'勝利',vital:'至關重要的',wander:'漫遊',widespread:'廣泛的',
+            wise:'明智的',wonder:'驚奇',work:'工作',worry:'擔心',yearn:'渴望',
+            // 基礎常用詞
+            cat:'貓',dog:'狗',run:'跑',jump:'跳',play:'玩',read:'閱讀',book:'書',
+            blue:'藍色',fast:'快速',kind:'善良',water:'水',fire:'火',earth:'土地',
+            wind:'風',sky:'天空',sun:'太陽',moon:'月亮',star:'星星',tree:'樹',
+            flower:'花',bird:'鳥',fish:'魚',cold:'寒冷',hot:'熱',big:'大',small:'小',
+            happy:'快樂',sad:'悲傷',good:'好',bad:'壞',old:'老舊',new:'新',
+            long:'長',short:'短',high:'高',low:'低',strong:'強壯',weak:'弱',
+            light:'光/輕',dark:'黑暗',clean:'乾淨',dirty:'骯髒',rich:'富有',poor:'貧窮',
+            true:'真實',false:'假的',open:'開放',close:'關閉',start:'開始',stop:'停止',
+            give:'給予',take:'拿取',make:'製作',break:'打破',find:'找到',lose:'失去',
+            win:'贏',fail:'失敗',live:'生活',die:'死亡',grow:'成長',fall:'落下',
+            rise:'上升',stand:'站立',sit:'坐下',walk:'走路',talk:'說話',see:'看見',
+            hear:'聽見',feel:'感覺',know:'知道',think:'思考',want:'想要',need:'需要',
+            like:'喜歡',love:'愛',hate:'恨',fear:'恐懼',hope:'希望',dream:'夢想',
+        };
+
+        function getChiDef(word) {
+            return CHI_MAP[word.toLowerCase()] || '';
+        }
+
+        function showPopup(word, x, y) {
+            word = word.replace(/[^a-zA-Z'-]/g, '').toLowerCase().trim();
+            if (!word || word.length < 2) return;
+
+            // Show popup immediately with loading state
+            popup.style.display = 'flex';
+            popWord.textContent  = word;
+            popIpa.textContent   = '';
+            popLoad.style.display = 'block';
+            popBody.style.display = 'none';
+            popErr.style.display  = 'none';
+            popBody.innerHTML     = '';
+            currentAudioUrl       = null;
+
+            // Position after display so we can measure
+            requestAnimationFrame(() => {
+                const pw = popup.offsetWidth  || 320;
+                const ph = popup.offsetHeight || 80;
+                const vw = window.innerWidth, vh = window.innerHeight;
+                let px = x + 14, py = y + 14;
+                if (px + pw > vw - 8) px = x - pw - 8;
+                if (py + ph > vh - 8) py = Math.max(8, vh - ph - 8);
+                if (px < 8) px = 8;
+                if (py < 8) py = 8;
+                popup.style.left = px + 'px';
+                popup.style.top  = py + 'px';
+            });
+
+            // Fetch full dictionary data
+            fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`)
+                .then(r => r.ok ? r.json() : Promise.reject('not found'))
+                .then(data => {
+                    popLoad.style.display = 'none';
+                    const entry = data[0];
+
+                    // ── Phonetics ──
+                    const phonetics = entry.phonetics || [];
+                    const ipaObj    = phonetics.find(p => p.text) || {};
+                    const audioObj  = phonetics.find(p => p.audio) || {};
+                    const ipa       = ipaObj.text || '';
+                    const audioUrl  = audioObj.audio || '';
+                    currentAudioUrl = audioUrl;
+                    popIpa.textContent = ipa;
+
+                    // ── Chinese definition ──
+                    const chiDef = getChiDef(word);
+
+                    // ── Build full content ──
+                    const meanings = entry.meanings || [];
+                    let html = '';
+
+                    // Chinese def banner (if available)
+                    if (chiDef) {
+                        html += `<div style="background:rgba(251,182,206,0.12); border-left:3px solid #fca5a5; border-radius:0 8px 8px 0; padding:8px 12px; margin:12px 0 10px; font-size:15px; font-weight:700; color:#fca5a5;">${chiDef}</div>`;
+                    }
+
+                    // Each part of speech
+                    meanings.forEach((m, mi) => {
+                        html += `<div style="margin-bottom:12px;">`;
+                        html += `<span style="display:inline-block; background:rgba(139,92,246,0.25); border:1px solid rgba(139,92,246,0.5); color:#c4b5fd; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">${m.partOfSpeech}</span>`;
+
+                        // Show up to 3 definitions
+                        const defs = (m.definitions || []).slice(0, 3);
+                        defs.forEach((d, di) => {
+                            html += `<div style="margin-bottom:8px;">`;
+                            html += `<div style="font-size:13px; color:#e2e8f0; line-height:1.55;">${di + 1}. ${d.definition}</div>`;
+                            if (d.example) {
+                                html += `<div style="font-size:12px; color:#7dd3fc; font-style:italic; margin-top:4px; padding-left:10px; border-left:2px solid rgba(125,211,252,0.3);">"${d.example}"</div>`;
+                            }
+                            html += `</div>`;
+                        });
+
+                        // Synonyms for this POS
+                        if (m.synonyms && m.synonyms.length > 0) {
+                            const syns = m.synonyms.slice(0, 6).join(', ');
+                            html += `<div style="font-size:11px; color:#94a3b8; margin-top:4px;">同義詞：<span style="color:#6ee7b7;">${syns}</span></div>`;
+                        }
+                        // Antonyms
+                        if (m.antonyms && m.antonyms.length > 0) {
+                            const ants = m.antonyms.slice(0, 4).join(', ');
+                            html += `<div style="font-size:11px; color:#94a3b8; margin-top:2px;">反義詞：<span style="color:#f87171;">${ants}</span></div>`;
+                        }
+
+                        html += `</div>`;
+
+                        // Divider between parts of speech
+                        if (mi < meanings.length - 1) {
+                            html += `<div style="height:1px; background:rgba(255,255,255,0.07); margin:4px 0 10px;"></div>`;
+                        }
+                    });
+
+                    // Source link hint (subtle)
+                    html += `<div style="font-size:10px; color:rgba(148,163,184,0.5); margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">📖 Free Dictionary API</div>`;
+
+                    popBody.innerHTML     = html;
+                    popBody.style.display = 'block';
+
+                    // Auto-play pronunciation
+                    if (audioUrl) {
+                        const a = new Audio(audioUrl);
+                        a.volume = 0.6;
+                        a.play().catch(() => {});
+                    } else {
+                        const u = new SpeechSynthesisUtterance(word);
+                        u.lang = 'en-US'; u.rate = 0.85;
+                        speechSynthesis.speak(u);
+                    }
+
+                    // Reposition after content loaded
+                    requestAnimationFrame(() => {
+                        const pw = popup.offsetWidth  || 320;
+                        const ph = popup.offsetHeight || 200;
+                        const vw = window.innerWidth, vh = window.innerHeight;
+                        let px = parseFloat(popup.style.left), py = parseFloat(popup.style.top);
+                        if (py + ph > vh - 8) py = Math.max(8, vh - ph - 8);
+                        if (px + pw > vw - 8) px = Math.max(8, vw - pw - 8);
+                        popup.style.left = px + 'px';
+                        popup.style.top  = py + 'px';
+                    });
+                })
+                .catch(() => {
+                    popLoad.style.display = 'none';
+                    // Check if we at least have a Chinese def for basic words
+                    const chiDef = getChiDef(word);
+                    if (chiDef) {
+                        popBody.innerHTML = `<div style="background:rgba(251,182,206,0.12); border-left:3px solid #fca5a5; border-radius:0 8px 8px 0; padding:8px 12px; margin:10px 0; font-size:15px; font-weight:700; color:#fca5a5;">${chiDef}</div><div style="font-size:12px; color:#94a3b8; margin-top:6px;">（網路連線問題，顯示基本定義）</div>`;
+                        popBody.style.display = 'block';
+                    } else {
+                        popErr.style.display  = 'block';
+                        popErr.innerHTML = `<div>查無「${word}」</div><div style="font-size:11px; margin-top:4px; color:#94a3b8;">請確認拼字，或檢查網路連線</div>`;
+                    }
+                    // TTS fallback
+                    const u = new SpeechSynthesisUtterance(word);
+                    u.lang = 'en-US'; u.rate = 0.85;
+                    speechSynthesis.speak(u);
+                });
+        }
+
+        // ── Buttons ───────────────────────────────────────────────
+        popAudio.onclick = () => {
+            if (currentAudioUrl) { new Audio(currentAudioUrl).play().catch(() => {}); }
+            else { const u = new SpeechSynthesisUtterance(popWord.textContent); u.lang = 'en-US'; speechSynthesis.speak(u); }
+        };
+        popClose.onclick = () => { popup.style.display = 'none'; };
+
+        // ── Close on outside click ────────────────────────────────
+        document.addEventListener('click', (e) => {
+            if (popup.style.display !== 'none' && !popup.contains(e.target)) {
+                popup.style.display = 'none';
+            }
+        });
+
+        // ── Double-click any text to look up ──────────────────────
+        document.addEventListener('dblclick', (e) => {
+            const sel = window.getSelection();
+            if (!sel || sel.isCollapsed) return;
+            const word = sel.toString().trim().replace(/[^a-zA-Z'-]/g, '');
+            if (word.length >= 2 && word.length <= 30) {
+                e.preventDefault();
+                showPopup(word, e.clientX, e.clientY);
+            }
+        });
+
+        // ── Long-press on mobile ───────────────────────────────────
+        let pressTimer = null;
+        document.addEventListener('touchstart', (e) => {
+            pressTimer = setTimeout(() => {
+                const sel = window.getSelection();
+                const word = sel ? sel.toString().trim().replace(/[^a-zA-Z'-]/g, '') : '';
+                if (word.length >= 2) {
+                    const touch = e.touches[0];
+                    showPopup(word, touch.clientX, touch.clientY);
+                }
+            }, 600);
+        }, { passive: true });
+        document.addEventListener('touchend',  () => clearTimeout(pressTimer), { passive: true });
+        document.addEventListener('touchmove', () => clearTimeout(pressTimer), { passive: true });
+
+        // ── Article clickable words ────────────────────────────────
+        document.addEventListener('click', (e) => {
+            const span = e.target.closest('.clickable-word');
+            if (!span) return;
+            const word = span.getAttribute('data-word') || span.textContent.trim();
+            if (word) { e.stopPropagation(); showPopup(word, e.clientX, e.clientY); }
+        }, true);
+
+        // Expose globally
+        window.showFloatDict = showPopup;
+    })();
+
     </script>
 </body>
 
