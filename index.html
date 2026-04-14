@@ -1045,7 +1045,17 @@ span.pronounce-wrong {
 
     /* Compound modal */
     .compound-layout { flex-direction: column; gap: 16px; }
-    .compound-chart-wrapper { min-height: 200px; }
+    .compound-chart-wrapper { min-height: 220px; }
+    /* Ensure compound modal content is fully scrollable on mobile */
+    #compoundModal .modal-content {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+    #compoundModal .compound-layout {
+        overflow-y: auto;
+    }
 
     /* English flashcard */
     .flashcard { padding: 28px 14px 16px !important; }
@@ -1376,67 +1386,65 @@ span.pronounce-wrong {
 
     <!-- 複利計算機 Modal -->
     <div id="compoundModal" class="modal-overlay">
-        <div class="glass-panel modal-panel" style="max-width:900px; width:95%;">
-            <header class="modal-header">
+        <div class="modal-content" style="max-width:900px;">
+            <div class="modal-header">
                 <h2>📈 複利試算</h2>
                 <button id="closeModalBtn" class="close-btn">&times;</button>
-            </header>
-            <div class="modal-content">
-                <div class="compound-layout">
-                    <!-- 左側輸入區 -->
-                    <div class="compound-inputs input-section">
-                        <div class="input-group">
-                            <label>初始本金</label>
-                            <div class="input-wrapper">
-                                <span class="currency">NT$</span>
-                                <input type="number" id="cpPrincipal" value="0" min="0" step="1">
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>每年定期投入</label>
-                            <div class="input-wrapper">
-                                <span class="currency">NT$</span>
-                                <input type="number" id="cpAnnualAdd" value="0" min="0" step="1">
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>預期年化報酬率</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="cpRate" value="5" min="0" max="100" step="0.1">
-                                <span class="unit">%</span>
-                            </div>
-                        </div>
-                        <div class="input-group" style="margin-top: 10px;">
-                            <label style="display:flex; justify-content:space-between;">
-                                <span>複利年限</span>
-                                <span id="cpYearsLabel"
-                                    style="color:var(--btn-primary); font-weight:800; font-size:16px;">10 年</span>
-                            </label>
-                            <input type="range" id="cpYears" min="1" max="50" value="10" class="slider">
-                        </div>
-
-                        <div class="divider"></div>
-
-                        <div class="dashboard-card highlight-card" style="margin-bottom:10px;">
-                            <span class="label">期末終值預估</span>
-                            <span class="value is-profit" id="cpFinalValue">0</span>
-                        </div>
-                        <div class="compound-subresults">
-                            <div class="detail-row">
-                                <span>總投入本金</span>
-                                <span id="cpTotalInvested">0</span>
-                            </div>
-                            <div class="detail-row">
-                                <span>複利滾存純利息</span>
-                                <span id="cpTotalInterest" class="is-profit">0</span>
-                            </div>
+            </div>
+            <div class="compound-layout">
+                <!-- 左側輸入區 -->
+                <div class="compound-inputs input-section">
+                    <div class="input-group">
+                        <label>初始本金</label>
+                        <div class="input-wrapper">
+                            <span class="currency">NT$</span>
+                            <input type="number" id="cpPrincipal" value="0" min="0" step="1">
                         </div>
                     </div>
-
-                    <!-- 右側圖表區 -->
-                    <div class="compound-chart-wrapper">
-                        <canvas id="compoundChart"></canvas>
+                    <div class="input-group">
+                        <label>每年定期投入</label>
+                        <div class="input-wrapper">
+                            <span class="currency">NT$</span>
+                            <input type="number" id="cpAnnualAdd" value="0" min="0" step="1">
+                        </div>
                     </div>
+                    <div class="input-group">
+                        <label>預期年化報酬率</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="cpRate" value="5" min="0" max="100" step="0.1">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                    <div class="input-group" style="margin-top: 10px;">
+                        <label style="display:flex; justify-content:space-between;">
+                            <span>複利年限</span>
+                            <span id="cpYearsLabel"
+                                style="color:var(--btn-primary); font-weight:800; font-size:16px;">10 年</span>
+                        </label>
+                        <input type="range" id="cpYears" min="1" max="50" value="10" class="slider">
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="dashboard-card highlight-card" style="margin-bottom:10px;">
+                        <span class="label">期末終值預估</span>
+                        <span class="value is-profit" id="cpFinalValue">0</span>
+                    </div>
+                    <div class="compound-subresults">
+                        <div class="detail-row">
+                            <span>總投入本金</span>
+                            <span id="cpTotalInvested">0</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>複利滾存純利息</span>
+                            <span id="cpTotalInterest" class="is-profit">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右側圖表區 -->
+                <div class="compound-chart-wrapper">
+                    <canvas id="compoundChart"></canvas>
                 </div>
             </div>
         </div>
@@ -6047,6 +6055,82 @@ document.addEventListener('DOMContentLoaded', () => {
         return window.innerWidth <= 640;
     }
 
+    // ── History-based back-button management ────────────────────────
+    // Tracks whether we pushed a state for an open modal/menu
+    let _historyModalOpen = false;
+
+    function _pushModalState() {
+        if (!_historyModalOpen) {
+            history.pushState({ modalOpen: true }, '');
+            _historyModalOpen = true;
+        }
+    }
+
+    function _clearModalState() {
+        _historyModalOpen = false;
+    }
+
+    // Returns the currently active modal overlay (if any), or null
+    function _getActiveModal() {
+        return document.querySelector('.modal-overlay.active');
+    }
+
+    // Returns true if the mobile "more" menu is visible
+    function _moreMenuVisible() {
+        const m = document.getElementById('mobileMoreMenu');
+        return m && m.style.display !== 'none';
+    }
+
+    // Central "close topmost layer" — called by popstate
+    function _closeTopLayer() {
+        if (_moreMenuVisible()) {
+            hideMobileMore();
+            return;
+        }
+        const modal = _getActiveModal();
+        if (modal) {
+            modal.classList.remove('active');
+            return;
+        }
+    }
+
+    // Intercept Android/browser back button
+    window.addEventListener('popstate', (e) => {
+        _clearModalState();
+        if (_moreMenuVisible() || _getActiveModal()) {
+            _closeTopLayer();
+            // Re-push so another back press can work again if needed
+        }
+    });
+
+    // ── Overlay click-to-close ───────────────────────────────────────
+    document.addEventListener('click', (e) => {
+        // If user clicked directly on the overlay (not on the modal-content inside)
+        if (e.target.classList.contains('modal-overlay') && e.target.classList.contains('active')) {
+            e.target.classList.remove('active');
+            _clearModalState();
+        }
+    });
+
+    // ── Patch all modal open calls to push history state ─────────────
+    // We monkey-patch classList.add('active') by wrapping the existing
+    // open-button event listeners. Easiest: observe the overlays.
+    const _modalOverlayObserver = new MutationObserver((mutations) => {
+        mutations.forEach(m => {
+            if (m.type === 'attributes' && m.attributeName === 'class') {
+                const el = m.target;
+                if (el.classList.contains('modal-overlay')) {
+                    if (el.classList.contains('active')) {
+                        _pushModalState();
+                    }
+                }
+            }
+        });
+    });
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        _modalOverlayObserver.observe(el, { attributes: true });
+    });
+
     function switchMobileTab(tab) {
         if (!isMobile()) return;
         const calcPanel = document.querySelector('.calculator-panel');
@@ -6071,9 +6155,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showMobileMore() {
         const menu = document.getElementById('mobileMoreMenu');
-        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-        const btn = document.getElementById('navMore');
-        btn.classList.toggle('active', menu.style.display !== 'none');
+        const isVisible = menu.style.display !== 'none';
+        if (!isVisible) {
+            menu.style.display = 'block';
+            document.getElementById('navMore').classList.add('active');
+            _pushModalState();
+        } else {
+            hideMobileMore();
+        }
     }
 
     function hideMobileMore() {
