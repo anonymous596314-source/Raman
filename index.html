@@ -975,16 +975,31 @@ span.pronounce-wrong {
     .inventory-header > div:last-child {
         width: 100%;
         display: grid !important;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: 1fr;
         gap: 8px;
         align-items: center;
     }
     #toggleViewBtn {
-        grid-column: 1 / -1;
+        grid-column: auto;
         width: 100%;
         font-size: 13px;
         padding: 10px;
         justify-content: center;
+    }
+    .inventory-header > div:last-child > div:first-of-type {
+        display: none !important;
+    }
+    .inventory-header > div:last-child > div:last-of-type {
+        display: block !important;
+        width: 100%;
+    }
+    .inventory-header > div:last-child > div:last-of-type > :not(#refreshPricesBtn) {
+        display: none !important;
+    }
+    #refreshPricesBtn {
+        width: 100%;
+        font-size: 13px;
+        padding: 10px;
     }
     .header-action-btn {
         width: 100%;
