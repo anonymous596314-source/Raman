@@ -1616,20 +1616,26 @@ span.pronounce-wrong {
                     <p style="color:var(--text-secondary); margin-bottom:8px;">想一下意思，然後點擊下方按鈕翻面...</p>
 
                     <!-- 背面：解釋與例句 (預設隱藏) -->
-                    <div id="flashcardBack" style="display:none; text-align:left; background:rgba(0,0,0,0.3); padding:24px; border-radius:12px; border:1px solid rgba(255,255,255,0.1);">
-                        <div style="display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid rgba(96, 165, 250, 0.3); padding-bottom:4px; margin-bottom:12px;">
-                            <h3 style="color:#60a5fa; margin:0;">解釋</h3>
-                            <button id="playChiDefBtn" style="background:transparent; border:none; cursor:pointer; color:var(--text-secondary); font-size:14px; opacity:0.7;">🗣️ 英文解析發音</button>
+                    <div id="flashcardBack" style="display:none; text-align:left; background:rgba(0,0,0,0.3); border-radius:12px; border:1px solid rgba(255,255,255,0.1); overflow:hidden;">
+                        <!-- 標題列 -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 18px 10px; border-bottom:1px solid rgba(96,165,250,0.25);">
+                            <h3 style="color:#60a5fa; margin:0; font-size:15px;">解釋 &amp; 例句</h3>
+                            <button id="playChiDefBtn" style="background:transparent; border:none; cursor:pointer; color:var(--text-secondary); font-size:13px; opacity:0.7;">🗣️ 朗讀解釋</button>
                         </div>
-                        <p id="flashcardEngDef" style="font-size:15px; color:#e2e8f0; margin-bottom:4px;"></p>
-                        <p id="flashcardChiDef" style="font-size:16px; color:#fca5a5; font-weight:bold; margin-bottom:20px;"></p>
-
-                        <div style="display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid rgba(96, 165, 250, 0.3); padding-bottom:4px; margin-bottom:12px;">
-                            <h3 style="color:#60a5fa; margin:0;">例句</h3>
+                        <!-- 可捲動主體 -->
+                        <div id="flashcardDefsContainer" style="max-height:340px; overflow-y:auto; padding:14px 18px; display:flex; flex-direction:column; gap:14px;">
+                            <!-- 各詞性定義由 JS 注入 -->
                         </div>
-                        <div id="flashcardEgsContainer" style="display:flex; flex-direction:column; gap:16px;">
-                            <!-- Example instances injected by JS -->
+                        <!-- 例句區 -->
+                        <div style="border-top:1px solid rgba(96,165,250,0.2); padding:12px 18px 4px;">
+                            <div style="font-size:12px; font-weight:700; color:#60a5fa; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">例句</div>
+                            <div id="flashcardEgsContainer" style="display:flex; flex-direction:column; gap:14px;">
+                                <!-- Example instances injected by JS -->
+                            </div>
                         </div>
+                        <!-- 隱藏的舊元素（保持 JS 相容性） -->
+                        <p id="flashcardEngDef" style="display:none;"></p>
+                        <p id="flashcardChiDef" style="display:none;"></p>
                     </div>
                 </div>
             </div>
@@ -1754,20 +1760,15 @@ span.pronounce-wrong {
             </div>
             
             <div style="flex:1; min-width:300px; display:flex; flex-direction:column; margin-top:20px;">
-                <h3 style="color:#6ee7b7; margin-bottom:10px;">歷史紀錄看版</h3>
-                <div style="max-height: 500px; overflow-y: auto; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px;">
-                    <table class="history-table" style="width: 100%; text-align: left; border-collapse: collapse;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid rgba(255,255,255,0.1);">
-                                <th style="padding: 10px; color: var(--text-secondary);">時間</th>
-                                <th style="padding: 10px; color: var(--text-secondary);">血壓 (收/舒)</th>
-                                <th style="padding: 10px; color: var(--text-secondary);">脈搏</th>
-                                <th style="padding: 10px; color: var(--text-secondary);">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bpTableBody">
-                        </tbody>
-                    </table>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="color:#6ee7b7; margin:0;">歷史紀錄</h3>
+                    <div style="display:flex; gap:6px;">
+                        <button id="bpViewMonthBtn" class="btn secondary-btn" style="padding:4px 12px; font-size:12px; background:rgba(52,211,153,0.2); border-color:rgba(52,211,153,0.5); color:#6ee7b7;">月視圖</button>
+                        <button id="bpViewYearBtn" class="btn secondary-btn" style="padding:4px 12px; font-size:12px; background:rgba(255,255,255,0.07); color:#94a3b8;">年視圖</button>
+                    </div>
+                </div>
+                <div id="bpHistoryContainer" style="max-height:520px; overflow-y:auto; background:rgba(0,0,0,0.15); border-radius:12px; padding:8px;">
+                    <div id="bpTableBody"></div>
                 </div>
             </div>
         </div>
@@ -1779,7 +1780,7 @@ span.pronounce-wrong {
             <div class="modal-header">
                 <h2>📈 每日歷史統計</h2>
                 <div style="display:flex; gap:8px; align-items:center;">
-                    <button id="historySnapshotBtn" class="btn secondary-btn" style="padding:6px 14px; font-size:13px; background:rgba(52,211,153,0.15); border-color:rgba(52,211,153,0.4); color:#6ee7b7;" title="把今日最新數據寫入歷史統計">📸 立即快照</button>
+                    <button id="historySnapshotBtn" class="btn secondary-btn" style="padding:6px 14px; font-size:13px; background:rgba(52,211,153,0.15); border-color:rgba(52,211,153,0.4); color:#6ee7b7;" title="把今日最新數據寫入歷史統計">🔄 更新統計</button>
                     <button class="close-btn" id="closeHistoryModalBtn">&times;</button>
                 </div>
             </div>
@@ -2461,131 +2462,121 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Real-time Stock Price via Reliable Fallbacks ---
     async function refreshPrices() {
-        refreshPricesBtn.textContent = '抓取中...';
-        refreshPricesBtn.disabled = true;
+        const btn = refreshPricesBtn;
+        btn.textContent = '⏳ 抓取中...';
+        btn.disabled = true;
+
+        const allItems = [...inventory, ...shortTermInventory];
+        if (allItems.length === 0) { btn.textContent = '↻ 更新股價'; btn.disabled = false; return; }
 
         let anySuccess = false;
-        let allItems = [...inventory, ...shortTermInventory];
+        const results = {}; // code -> price
 
-        // 0. Primary official TWSE data (No proxy needed, works for all listed Taiwan stocks)
-        let twseMap = {};
-        try {
-            const twseRes = await fetch('https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL');
-            if (twseRes.ok) {
-                const twseData = await twseRes.json();
-                twseData.forEach(dt => {
-                    if(dt.ClosingPrice) {
-                        twseMap[dt.Code] = parseFloat(String(dt.ClosingPrice).replace(/,/g, ''));
-                    }
-                });
-            }
-        } catch(e) {
-            console.warn("TWSE API failed:", e);
+        // ── 工具：從文字擷取價格數字 ─────────────────────────────
+        function parsePrice(val) {
+            if (!val) return null;
+            const n = parseFloat(String(val).replace(/,/g, ''));
+            return (!isNaN(n) && n > 0) ? n : null;
         }
 
-        for (let item of allItems) {
-            let rawSymbol = item.code.trim().replace(/\.TW$/i, '').replace(/\.TWO$/i, '');
-            
-            // Fast track TWSE map lookup
-            if (twseMap[rawSymbol] && !isNaN(twseMap[rawSymbol])) {
-                let price = twseMap[rawSymbol];
-                if (price !== item.currentPrice) {
-                    if (!anySuccess) recordState();
-                    item.currentPrice = price;
-                    anySuccess = true;
-                }
-                continue; // Found it in TWSE, move to next!
-            }
+        // ── 工具：分類上市(TSE)/上櫃(OTC)/美股 ──────────────────
+        function classifyCode(code) {
+            const c = code.trim().replace(/\.TW(O)?$/i, '');
+            // 純數字 = 台股；有字母 = 美股或 ETF
+            if (/^\d+$/.test(c)) return { type: c.endsWith('O') ? 'otc' : 'tse', code: c };
+            if (/^[A-Z]{1,5}\d*$/.test(c.toUpperCase())) return { type: 'us', code: c.toUpperCase() };
+            return { type: 'tse', code: c };
+        }
 
-            let symbol = item.code.trim();
-            if (/^[a-zA-Z0-9]+$/.test(symbol)) {
-                symbol = `${symbol}.TW`;
-            } else if (!symbol.includes('.')) {
-                symbol = `${symbol}.TW`;
-            }
-
-            let fallbackSuccess = false;
-
-            // 1. Yahoo Finance API
+        // ══ 方法 1：TWSE 即時揭示報價（盤中）════════════════════
+        // endpoint: /v1/exchangeReport/STOCK_DAY_AVG_ALL  → 今日成交均價（非即時）
+        // 即時用: /v1/exchangeReport/MI_INDEX_ALLBUT0999  → 大盤
+        // 最快即時: https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=tse_2330.tw
+        async function fetchTWSERealtime(code) {
             try {
-                const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`;
-                const rawData = await fetchWithProxy(url, true);
-                
-                const price = rawData.chart.result[0].meta.regularMarketPrice;
-                if (price) {
-                    if (price !== item.currentPrice) {
-                        if (!anySuccess) recordState();
-                        item.currentPrice = price;
-                        anySuccess = true;
-                    }
-                    fallbackSuccess = true;
-                } else {
-                    throw new Error('Yahoo proxy returned no price');
-                }
-            } catch (err) {
-                console.warn('Yahoo API error for', symbol, '- Trying Yahoo TW HTML...');
+                const ex = 'tse';
+                const url = `https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=${ex}_${code}.tw&_=${Date.now()}`;
+                const r = await fetch(url, { headers: { 'Referer': 'https://mis.twse.com.tw/' } });
+                if (!r.ok) return null;
+                const j = await r.json();
+                const d = j?.msgArray?.[0];
+                if (!d) return null;
+                // z = 成交價, v = 成交量, b = 買一, a = 賣一
+                const price = parsePrice(d.z) || parsePrice(d.y); // z=即時成交, y=昨收(盤前/盤後)
+                return price;
+            } catch(e) { return null; }
+        }
+
+        // ══ 方法 2：TPEX 即時報價（上櫃） ════════════════════════
+        async function fetchTPEXRealtime(code) {
+            try {
+                const url = `https://www.tpex.org.tw/openapi/v1/tpex_mainboard_realtime_quotes?stockNo=${code}`;
+                const r = await fetch(url);
+                if (!r.ok) return null;
+                const j = await r.json();
+                if (!Array.isArray(j) || j.length === 0) return null;
+                return parsePrice(j[0]?.Close || j[0]?.Price);
+            } catch(e) { return null; }
+        }
+
+        // ══ 方法 3：TWSE OpenAPI 今日收盤（盤後備援）════════════
+        let twseCloseMap = {};
+        let tpexCloseMap = {};
+        try {
+            const [twseR, tpexR] = await Promise.allSettled([
+                fetch('https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL'),
+                fetch('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes')
+            ]);
+            if (twseR.status==='fulfilled' && twseR.value.ok) {
+                const d = await twseR.value.json();
+                d.forEach(x => { const p=parsePrice(x.ClosingPrice); if(p) twseCloseMap[x.Code]=p; });
+            }
+            if (tpexR.status==='fulfilled' && tpexR.value.ok) {
+                const d = await tpexR.value.json();
+                d.forEach(x => { const p=parsePrice(x.Close||x.Price); if(p) tpexCloseMap[x.SecuritiesCompanyCode||x.Code]=p; });
+            }
+        } catch(e) {}
+
+        // ══ 方法 4：Yahoo Finance（美股 / ETF 備援）══════════════
+        async function fetchYahoo(symbol) {
+            try {
+                const ySymbol = symbol.includes('.') ? symbol : `${symbol}.TW`;
+                const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ySymbol)}?interval=1m&range=1d`;
+                const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                if (!r.ok) return null;
+                const j = await r.json();
+                const meta = j?.chart?.result?.[0]?.meta;
+                return parsePrice(meta?.regularMarketPrice) || parsePrice(meta?.previousClose);
+            } catch(e) { return null; }
+        }
+
+        // ══ 對每支股票依序嘗試最快來源 ══════════════════════════
+        btn.textContent = `⏳ 0/${allItems.length}`;
+        for (let i = 0; i < allItems.length; i++) {
+            const item = allItems[i];
+            btn.textContent = `⏳ ${i+1}/${allItems.length}`;
+            const raw = item.code.trim().replace(/\s+.*$/, ''); // 取代號前的數字部分
+            const info = classifyCode(raw);
+            let price = null;
+
+            if (info.type === 'tse') {
+                // 先嘗試即時，再fallback收盤
+                price = await fetchTWSERealtime(info.code);
+                if (!price) price = twseCloseMap[info.code] || null;
+            } else if (info.type === 'otc') {
+                price = await fetchTPEXRealtime(info.code);
+                if (!price) price = tpexCloseMap[info.code] || null;
             }
 
-            // 2. Yahoo TW HTML (very reliable for TW stocks)
-            if (!fallbackSuccess) {
-                try {
-                    const rawSymbol = item.code.trim();
-                    const twUrl = `https://tw.stock.yahoo.com/quote/${rawSymbol}`;
-                    const html = await fetchWithProxy(twUrl, false);
-                    
-                    let priceValue = null;
-                    if (html) {
-                        const m = html.match(/"currentPrice":([\d\.,]+)/) || html.match(/"regularMarketPrice":\{"raw":([\d\.,]+)/) || html.match(/<span[^>]*Fz\(32px\)[^>]*>([\d\.,]+)<\/span>/);
-                        if (m && m[1]) {
-                            priceValue = window.parseFloat(String(m[1]).replace(/,/g, ''));
-                        }
-                    }
-                    if (priceValue !== null && !isNaN(priceValue)) {
-                        if (priceValue !== item.currentPrice) {
-                            if (!anySuccess) recordState();
-                            item.currentPrice = priceValue;
-                            anySuccess = true;
-                        }
-                        fallbackSuccess = true;
-                    } else {
-                        throw new Error('Yahoo TW HTML parsed no price');
-                    }
-                } catch(yhErr) {
-                    console.warn('Yahoo TW HTML error for', item.code, '- Trying CMoney...');
-                }
-            }
+            // 任何類型都可以用 Yahoo 作最終備援
+            if (!price) price = await fetchYahoo(info.code);
 
-            // 3. CMoney HTML
-            if (!fallbackSuccess) {
-                try {
-                    const rawSymbol = item.code.trim();
-                    const cmUrl = `https://www.cmoney.tw/finance/twstock/${rawSymbol}`;
-                    const html = await fetchWithProxy(cmUrl, false);
-                    
-                    let priceValue = null;
-                    if (html) {
-                        let mDesc = html.match(/成交價[^\d]*([\d\.,]+)/);
-                        let mProps = html.match(/itemprop="price"[^>]*>([\d\.,]+)/i);
-                        let mJson = html.match(/"price"\s*:\s*([\d\.,]+)/i);
-                        
-                        if (mDesc && mDesc[1]) priceValue = window.parseFloat(String(mDesc[1]).replace(/,/g, ''));
-                        else if (mProps && mProps[1]) priceValue = window.parseFloat(String(mProps[1]).replace(/,/g, ''));
-                        else if (mJson && mJson[1]) priceValue = window.parseFloat(String(mJson[1]).replace(/,/g, ''));
-                    }
-                    
-                    if (priceValue !== null && !isNaN(priceValue)) {
-                        if (priceValue !== item.currentPrice) {
-                            if (!anySuccess) recordState();
-                            item.currentPrice = priceValue;
-                            anySuccess = true;
-                        }
-                        fallbackSuccess = true;
-                    } else {
-                        throw new Error('CMoney HTML parsed no price');
-                    }
-                } catch(cmErr) {
-                    console.error('All fallbacks failed for', item.code, cmErr.message);
-                }
+            if (price && price !== item.currentPrice) {
+                if (!anySuccess) recordState();
+                item.currentPrice = price;
+                anySuccess = true;
+            } else if (price) {
+                anySuccess = true; // 價格相同也算成功（資料一致）
             }
         }
 
@@ -2597,8 +2588,8 @@ document.addEventListener('DOMContentLoaded', () => {
             await logDailyStats();
         }
 
-        refreshPricesBtn.textContent = '↻ 更新股價';
-        refreshPricesBtn.disabled = false;
+        btn.textContent = '↻ 更新股價';
+        btn.disabled = false;
         
         if (!anySuccess && allItems.length > 0) {
             alert('抓取完成：目前可能因為網路或代號問題無法取得最新現價。如有需要請手動更新。');
@@ -3421,7 +3412,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (dailyStats.length === 0) {
             const tr = document.createElement('tr');
-            tr.innerHTML = '<td colspan="8" style="padding:30px; text-align:center; color:#94a3b8;">尚無歷史統計資料。按「更新股價」或「立即快照」按鈕來記錄今日數據。</td>';
+            tr.innerHTML = '<td colspan="8" style="padding:30px; text-align:center; color:#94a3b8;">尚無歷史統計資料。按「更新股價」或「更新統計」按鈕來記錄今日數據。</td>';
             historyTableBody.appendChild(tr);
         }
     }
@@ -3439,12 +3430,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', async (e) => {
         if (e.target && e.target.id === 'historySnapshotBtn') {
             const btn = e.target;
-            btn.textContent = '⏳ 快照中...';
+            btn.textContent = '⏳ 更新中...';
             btn.disabled = true;
             await logDailyStats();
             renderHistoryTable();
-            btn.textContent = '✅ 已更新';
-            setTimeout(() => { btn.textContent = '📸 立即快照'; btn.disabled = false; }, 1500);
+            btn.textContent = '✅ 已同步';
+            setTimeout(() => { btn.textContent = '🔄 更新統計'; btn.disabled = false; }, 1500);
         }
     });
     if (closeHistoryModalBtn) {
@@ -3668,6 +3659,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedBP = localStorage.getItem('twStockBP');
     if (savedBP) bpData = JSON.parse(savedBP);
 
+    // 血壓月/年視圖切換
+    document.addEventListener('click', (e) => {
+        if (e.target.id === 'bpViewMonthBtn') {
+            bpViewMode = 'month';
+            e.target.style.background='rgba(52,211,153,0.2)'; e.target.style.color='#6ee7b7'; e.target.style.borderColor='rgba(52,211,153,0.5)';
+            const yBtn=document.getElementById('bpViewYearBtn');
+            if(yBtn){yBtn.style.background='rgba(255,255,255,0.07)';yBtn.style.color='#94a3b8';yBtn.style.borderColor='rgba(255,255,255,0.15)';}
+            renderBP();
+        }
+        if (e.target.id === 'bpViewYearBtn') {
+            bpViewMode = 'year';
+            e.target.style.background='rgba(52,211,153,0.2)'; e.target.style.color='#6ee7b7'; e.target.style.borderColor='rgba(52,211,153,0.5)';
+            const mBtn=document.getElementById('bpViewMonthBtn');
+            if(mBtn){mBtn.style.background='rgba(255,255,255,0.07)';mBtn.style.color='#94a3b8';mBtn.style.borderColor='rgba(255,255,255,0.15)';}
+            renderBP();
+        }
+    });
+
     if (openBPBtn) {
         openBPBtn.addEventListener('click', () => {
             try {
@@ -3701,7 +3710,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (bpTableBody) {
-        bpTableBody.addEventListener('click', (e) => {
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#bpHistoryContainer')) return;
             if (e.target.classList.contains('delete-bp-btn')) {
                 const id = e.target.getAttribute('data-id');
                 bpData = bpData.filter(item => item.id !== parseInt(id));
@@ -3738,24 +3748,110 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    let bpViewMode = 'month'; // 'month' or 'year'
+    let bpExpandedGroups = new Set(); // 哪些群組是展開的
+
     function renderBP() {
         try {
-            if (!bpTableBody) return;
-            bpTableBody.innerHTML = '';
-            
+            const container = document.getElementById('bpHistoryContainer') || bpTableBody;
+            if (!container) return;
+
+            // ── 統計卡片 ──
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            let daily={sys:0,dia:0,count:0}, weekly={sys:0,dia:0,count:0}, monthly={sys:0,dia:0,count:0}, total={sys:0,dia:0,count:0};
             bpData.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
-                const bpColor = item.sys >= 130 || item.dia >= 85 ? '#fca5a5' : '#86efac';
-                tr.innerHTML = `
-                    <td style="padding:8px;">${item.date} ${item.time}</td>
-                    <td style="padding:8px; color:${bpColor}; font-weight:bold;">${item.sys} / ${item.dia}</td>
-                    <td style="padding:8px;">${item.pulse}</td>
-                    <td style="padding:8px;">
-                        <button class="delete-bp-btn" data-id="${item.id}" style="background:rgba(239, 68, 68, 0.2); color:#fca5a5; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">刪除</button>
-                    </td>
-                `;
-                bpTableBody.appendChild(tr);
+                const d = new Date(`${item.date}T00:00:00`);
+                const diff = (new Date(`${todayStr}T00:00:00`) - d) / 86400000;
+                if (isNaN(diff)) return;
+                total.sys+=item.sys; total.dia+=item.dia; total.count++;
+                if (item.date===todayStr){daily.sys+=item.sys;daily.dia+=item.dia;daily.count++;}
+                if (diff<=7&&diff>=0){weekly.sys+=item.sys;weekly.dia+=item.dia;weekly.count++;}
+                if (diff<=30&&diff>=0){monthly.sys+=item.sys;monthly.dia+=item.dia;monthly.count++;}
+            });
+            const fmt = s => s.count > 0 ? `${Math.round(s.sys/s.count)} / ${Math.round(s.dia/s.count)}` : '-- / --';
+            const sd=document.getElementById('bpStatDaily'), sw=document.getElementById('bpStatWeekly');
+            const sm=document.getElementById('bpStatMonthly'), sa=document.getElementById('bpStatAll');
+            if(sd) sd.textContent=fmt(daily);
+            if(sw) sw.textContent=fmt(weekly);
+            if(sm) sm.textContent=fmt(monthly);
+            if(sa) sa.textContent=fmt(total);
+
+            // ── 分組渲染 ──
+            container.innerHTML = '';
+            if (bpData.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; font-size:13px;">尚無血壓記錄</div>';
+                return;
+            }
+
+            // 按月或年分組
+            const groups = {};
+            bpData.slice().reverse().forEach(item => {
+                const key = bpViewMode === 'year'
+                    ? item.date.substring(0, 4)
+                    : item.date.substring(0, 7);
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(item);
+            });
+
+            Object.keys(groups).sort((a,b) => b.localeCompare(a)).forEach(key => {
+                const items = groups[key];
+                const isExpanded = bpExpandedGroups.has(key);
+
+                // 計算群組平均
+                const gAvgSys = Math.round(items.reduce((s,i)=>s+i.sys,0)/items.length);
+                const gAvgDia = Math.round(items.reduce((s,i)=>s+i.dia,0)/items.length);
+                const gAvgPulse = Math.round(items.reduce((s,i)=>s+i.pulse,0)/items.length);
+                const gColor = gAvgSys >= 130 || gAvgDia >= 85 ? '#fca5a5' : '#86efac';
+
+                // 群組標題列
+                const label = bpViewMode === 'year' ? `${key} 年` : `${key.replace('-','年')}月`;
+                const header = document.createElement('div');
+                header.style.cssText = `display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.2); border-radius:10px; cursor:pointer; margin-bottom:4px; user-select:none; transition:background 0.15s;`;
+                header.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:13px; font-weight:700; color:#6ee7b7;">${label}</span>
+                        <span style="font-size:11px; color:#94a3b8;">${items.length} 筆</span>
+                        <span style="font-size:13px; font-weight:700; color:${gColor};">均 ${gAvgSys}/${gAvgDia}</span>
+                        <span style="font-size:11px; color:#94a3b8;">💓 ${gAvgPulse}</span>
+                    </div>
+                    <span style="color:#94a3b8; font-size:16px; transition:transform 0.2s; transform:rotate(${isExpanded?'90deg':'0deg'})">&rsaquo;</span>`;
+                header.onmouseover = () => { header.style.background='rgba(52,211,153,0.13)'; };
+                header.onmouseleave = () => { header.style.background='rgba(52,211,153,0.08)'; };
+                header.onclick = () => {
+                    if (bpExpandedGroups.has(key)) bpExpandedGroups.delete(key);
+                    else bpExpandedGroups.add(key);
+                    renderBP();
+                };
+                container.appendChild(header);
+
+                // 明細列（展開時顯示）
+                if (isExpanded) {
+                    const table = document.createElement('table');
+                    table.style.cssText = 'width:100%; text-align:left; border-collapse:collapse; margin-bottom:8px;';
+                    table.innerHTML = `<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                        <th style="padding:6px 8px; font-size:11px; color:#94a3b8;">日期時間</th>
+                        <th style="padding:6px 8px; font-size:11px; color:#94a3b8;">血壓</th>
+                        <th style="padding:6px 8px; font-size:11px; color:#94a3b8;">脈搏</th>
+                        <th style="padding:6px 8px; font-size:11px; color:#94a3b8;"></th>
+                    </tr></thead>`;
+                    const tbody = document.createElement('tbody');
+                    items.forEach(item => {
+                        const bpColor = item.sys >= 130 || item.dia >= 85 ? '#fca5a5' : '#86efac';
+                        const tr = document.createElement('tr');
+                        tr.style.borderBottom = '1px solid rgba(255,255,255,0.04)';
+                        tr.innerHTML = `
+                            <td style="padding:7px 8px; font-size:12px; color:#cbd5e1;">${item.date} ${item.time}</td>
+                            <td style="padding:7px 8px; font-size:13px; font-weight:700; color:${bpColor};">${item.sys} / ${item.dia}</td>
+                            <td style="padding:7px 8px; font-size:12px; color:#cbd5e1;">${item.pulse}</td>
+                            <td style="padding:7px 8px;">
+                                <button class="delete-bp-btn" data-id="${item.id}" style="background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3); padding:3px 8px; border-radius:4px; cursor:pointer; font-size:11px;">✕</button>
+                            </td>`;
+                        tbody.appendChild(tr);
+                    });
+                    table.appendChild(tbody);
+                    container.appendChild(table);
+                }
             });
 
             const now = new Date();
@@ -4238,6 +4334,107 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ── 通用：渲染所有詞性定義到字卡（含同義詞頻率過濾）──────────
+    async function filterValidWords(words) {
+        // 用 Datamuse 批次驗證：只保留頻率 > 0.5/M 的字（過濾生僻字）
+        const valid = [];
+        for (const w of words.slice(0, 8)) {
+            try {
+                const r = await fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(w)}&md=f&max=1`);
+                if (r.ok) {
+                    const j = await r.json();
+                    if (j.length > 0) {
+                        const fTag = (j[0].tags || []).find(t => t.startsWith('f:'));
+                        const freq = fTag ? parseFloat(fTag.split(':')[1]) : 0;
+                        if (freq > 0.3) valid.push(w); // 過濾頻率太低的字
+                    }
+                }
+            } catch(e) { valid.push(w); } // 網路錯誤時保留
+            if (valid.length >= 5) break;
+        }
+        return valid;
+    }
+
+    async function renderWordDefs(data, container) {
+        if (!container) return;
+        container.innerHTML = '';
+
+        const meanings = data.allMeanings || [];
+        if (meanings.length === 0) {
+            // Fallback：只顯示舊式 engDef + chiDef
+            container.innerHTML = `
+                <div>
+                    <div style="font-size:14px; color:#e2e8f0; line-height:1.6;">${data.engDef}</div>
+                    <div style="font-size:15px; color:#fca5a5; font-weight:700; margin-top:6px;">${data.chiDef}</div>
+                </div>`;
+            return;
+        }
+
+        // 中文定義 banner
+        if (data.chiDef && data.chiDef.trim()) {
+            const chiDiv = document.createElement('div');
+            chiDiv.style.cssText = 'background:rgba(251,182,206,0.1); border-left:3px solid #fca5a5; border-radius:0 8px 8px 0; padding:8px 12px; font-size:15px; font-weight:700; color:#fca5a5;';
+            chiDiv.textContent = data.chiDef.replace(/^\[|\]$/g, '');
+            container.appendChild(chiDiv);
+        }
+
+        for (const m of meanings) {
+            const block = document.createElement('div');
+            block.style.cssText = 'border-left:2px solid rgba(139,92,246,0.4); padding-left:12px; margin-top:4px;';
+
+            // 詞性標籤
+            const posTag = document.createElement('span');
+            posTag.textContent = m.partOfSpeech;
+            posTag.style.cssText = 'display:inline-block; background:rgba(139,92,246,0.25); border:1px solid rgba(139,92,246,0.5); color:#c4b5fd; font-size:11px; font-weight:700; padding:2px 9px; border-radius:20px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;';
+            block.appendChild(posTag);
+
+            // 定義列表
+            (m.definitions || []).forEach((d, di) => {
+                const defDiv = document.createElement('div');
+                defDiv.style.cssText = 'margin-bottom:8px;';
+                defDiv.innerHTML = `<div style="font-size:13px; color:#e2e8f0; line-height:1.6;">${di+1}. ${d.definition}</div>`;
+                if (d.example) {
+                    defDiv.innerHTML += `<div style="font-size:12px; color:#7dd3fc; font-style:italic; margin-top:3px; padding-left:10px; border-left:2px solid rgba(125,211,252,0.3);">"${d.example}"</div>`;
+                }
+                block.appendChild(defDiv);
+            });
+
+            // 同義詞（異步驗證）
+            if (m.synonyms && m.synonyms.length > 0) {
+                const synDiv = document.createElement('div');
+                synDiv.style.cssText = 'font-size:11px; color:#94a3b8; margin-top:4px;';
+                synDiv.innerHTML = '同義詞：<span style="color:#6ee7b7;">驗證中...</span>';
+                block.appendChild(synDiv);
+                filterValidWords(m.synonyms).then(valid => {
+                    synDiv.innerHTML = valid.length > 0
+                        ? `同義詞：<span style="color:#6ee7b7;">${valid.join('、')}</span>`
+                        : '';
+                });
+            }
+            // 反義詞（同樣驗證）
+            if (m.antonyms && m.antonyms.length > 0) {
+                const antDiv = document.createElement('div');
+                antDiv.style.cssText = 'font-size:11px; color:#94a3b8; margin-top:2px;';
+                antDiv.innerHTML = '反義詞：<span style="color:#f87171;">驗證中...</span>';
+                block.appendChild(antDiv);
+                filterValidWords(m.antonyms).then(valid => {
+                    antDiv.innerHTML = valid.length > 0
+                        ? `反義詞：<span style="color:#f87171;">${valid.join('、')}</span>`
+                        : '';
+                });
+            }
+
+            container.appendChild(block);
+
+            // 分隔線
+            if (meanings.indexOf(m) < meanings.length - 1) {
+                const hr = document.createElement('div');
+                hr.style.cssText = 'height:1px; background:rgba(255,255,255,0.07); margin:2px 0;';
+                container.appendChild(hr);
+            }
+        }
+    }
+
     if (dictSearchBtn) {
         dictSearchBtn.addEventListener('click', () => {
             const word = dictSearchInput.value.trim().toLowerCase();
@@ -4267,52 +4464,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 wordFreqStars.innerHTML = `<span title="Datamuse Frequency: ${data.frequencyRaw || 0}/M" style="cursor:help;">${starHtml}</span>`;
 
-                flashcardEngDef.textContent = data.engDef;
+                flashcardEngDef.textContent = data.engDef; // 保留相容性
                 flashcardChiDef.textContent = data.chiDef;
                 currentEngDefText = data.engDef;
-                
+
+                // ── 渲染全部詞性定義 ──
+                const defsContainer = document.getElementById('flashcardDefsContainer');
+                renderWordDefs(data, defsContainer);
+
+                // ── 渲染例句 ──
                 currentEgTexts = [];
-                data.examples.forEach((exObj, idx) => {
-                    currentEgTexts.push(exObj.eng);
-                    const egDiv = document.createElement('div');
-                    egDiv.className = 'eg-item';
-                    egDiv.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; align-items:start; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
-                            <div style="flex:1;">
-                                <p style="font-size:15px; color:#e2e8f0; margin-bottom:4px; font-style:italic;">${idx+1}. ${exObj.eng}</p>
-                                <p style="font-size:14px; color:#cbd5e1; margin:0;">${exObj.chi}</p>
-                            </div>
-                            <div style="display:flex;">
-                                <button class="play-single-eg-btn" data-eg="${exObj.eng.replace(/"/g, '&quot;')}" style="background:transparent; border:none; cursor:pointer; font-size:20px; padding:4px;">🔊</button>
-                                <button class="record-single-eg-btn" data-eg="${exObj.eng.replace(/"/g, '&quot;')}" style="background:transparent; border:none; cursor:pointer; font-size:20px; padding:4px;">🎤</button>
-                            </div>
-                        </div>
-                        <div class="shadow-result-container" style="display:none; font-size:14px; margin-top:4px; margin-bottom:8px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px;"></div>`;
-                    flashcardEgsContainer.appendChild(egDiv);
-                });
-
-                flashcardEgsContainer.querySelectorAll('.play-single-eg-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const txt = e.currentTarget.getAttribute('data-eg');
-                        speakTTS(txt, 'en-US');
-                    });
-                });
-                
-                flashcardEgsContainer.querySelectorAll('.record-single-eg-btn').forEach(btn => {
-                    const txt = btn.getAttribute('data-eg');
-                    const resultContainer = btn.closest('.eg-item').querySelector('.shadow-result-container');
-                    setupShadowing(btn, txt, resultContainer);
-                });
-
+                flashcardEgsContainer.innerHTML = '';
                 if (data.examples.length === 0) {
-                    flashcardEgsContainer.innerHTML = `<p style="font-size:14px; color:#cbd5e1; opacity:0.5;">No examples available.</p>`;
+                    flashcardEgsContainer.innerHTML = `<p style="font-size:13px; color:#94a3b8; font-style:italic;">暫無例句</p>`;
+                } else {
+                    data.examples.forEach((exObj, idx) => {
+                        currentEgTexts.push(exObj.eng);
+                        const egDiv = document.createElement('div');
+                        egDiv.className = 'eg-item';
+                        egDiv.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:start; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
+                                <div style="flex:1;">
+                                    <p style="font-size:14px; color:#e2e8f0; margin-bottom:4px; font-style:italic; line-height:1.6;">${idx+1}. ${exObj.eng}</p>
+                                    <p style="font-size:13px; color:#94a3b8; margin:0;">${exObj.chi}</p>
+                                </div>
+                                <div style="display:flex; flex-shrink:0;">
+                                    <button class="play-single-eg-btn" data-eg="${exObj.eng.replace(/"/g, '&quot;')}" style="background:transparent; border:none; cursor:pointer; font-size:18px; padding:4px;">🔊</button>
+                                    <button class="record-single-eg-btn" data-eg="${exObj.eng.replace(/"/g, '&quot;')}" style="background:transparent; border:none; cursor:pointer; font-size:18px; padding:4px;">🎤</button>
+                                </div>
+                            </div>
+                            <div class="shadow-result-container" style="display:none; font-size:13px; margin-top:4px; margin-bottom:6px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px;"></div>`;
+                        flashcardEgsContainer.appendChild(egDiv);
+                    });
+                    flashcardEgsContainer.querySelectorAll('.play-single-eg-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => { e.stopPropagation(); speakTTS(e.currentTarget.getAttribute('data-eg'), 'en-US'); });
+                    });
+                    flashcardEgsContainer.querySelectorAll('.record-single-eg-btn').forEach(btn => {
+                        setupShadowing(btn, btn.getAttribute('data-eg'), btn.closest('.eg-item').querySelector('.shadow-result-container'));
+                    });
                 }
 
                 wordLoading.style.display = 'none';
                 wordContent.style.display = 'block';
-                
-                // Directly flip card
                 flashcardBack.style.display = 'block';
                 actionFront.style.display = 'none';
                 actionBack.style.display = 'none';
@@ -4457,47 +4650,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         wordFreqStars.innerHTML = `<span title="Datamuse Frequency: ${data.frequencyRaw || 0}/M" style="cursor:help;">${starHtml}</span>`;
 
-        flashcardEngDef.textContent = data.engDef;
+        flashcardEngDef.textContent = data.engDef; // 相容性
         flashcardChiDef.textContent = data.chiDef;
         currentEngDefText = data.engDef;
-        
-        // Setup Examples
+
+        // ── 渲染全部詞性定義 ──
+        const defsContainerAnki = document.getElementById('flashcardDefsContainer');
+        renderWordDefs(data, defsContainerAnki);
+
+        // ── 渲染例句 ──
         currentEgTexts = [];
-        data.examples.forEach((exObj, idx) => {
-            currentEgTexts.push(exObj.eng);
-            const egDiv = document.createElement('div');
-            egDiv.className = 'eg-item';
-            egDiv.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:start; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
-                    <div style="flex:1;">
-                        <p style="font-size:15px; color:#e2e8f0; margin-bottom:4px; font-style:italic;">${idx+1}. ${exObj.eng}</p>
-                        <p style="font-size:14px; color:#cbd5e1; margin:0;">${exObj.chi}</p>
-                    </div>
-                    <div style="display:flex;">
-                        <button class="play-single-eg-btn" data-eg="${exObj.eng.replace(/"/g, '&quot;')}" style="background:transparent; border:none; cursor:pointer; font-size:20px; padding:4px;">🔊</button>
-                        <button class="record-single-eg-btn" data-eg="${exObj.eng.replace(/"/g, '&quot;')}" style="background:transparent; border:none; cursor:pointer; font-size:20px; padding:4px;">🎤</button>
-                    </div>
-                </div>
-                <div class="shadow-result-container" style="display:none; font-size:14px; margin-top:4px; margin-bottom:8px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px;"></div>`;
-            flashcardEgsContainer.appendChild(egDiv);
-        });
-
-        flashcardEgsContainer.querySelectorAll('.play-single-eg-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const txt = e.currentTarget.getAttribute('data-eg');
-                speakTTS(txt, 'en-US');
-            });
-        });
-
-        flashcardEgsContainer.querySelectorAll('.record-single-eg-btn').forEach(btn => {
-            const txt = btn.getAttribute('data-eg');
-            const resultContainer = btn.closest('.eg-item').querySelector('.shadow-result-container');
-            setupShadowing(btn, txt, resultContainer);
-        });
-
+        flashcardEgsContainer.innerHTML = '';
         if (data.examples.length === 0) {
-            flashcardEgsContainer.innerHTML = `<p style="font-size:14px; color:#cbd5e1; opacity:0.5;">No examples available.</p>`;
+            flashcardEgsContainer.innerHTML = '<p style="font-size:13px; color:#94a3b8; font-style:italic;">暫無例句</p>';
+        } else {
+            data.examples.forEach((exObj, idx) => {
+                currentEgTexts.push(exObj.eng);
+                const egDiv = document.createElement('div');
+                egDiv.className = 'eg-item';
+                egDiv.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:start; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
+                        <div style="flex:1;">
+                            <p style="font-size:14px; color:#e2e8f0; margin-bottom:4px; font-style:italic; line-height:1.6;">${idx+1}. ${exObj.eng}</p>
+                            <p style="font-size:13px; color:#94a3b8; margin:0;">${exObj.chi}</p>
+                        </div>
+                        <div style="display:flex; flex-shrink:0;">
+                            <button class="play-single-eg-btn" data-eg="${exObj.eng.replace(/"/g, '&quot;')}" style="background:transparent; border:none; cursor:pointer; font-size:18px; padding:4px;">🔊</button>
+                            <button class="record-single-eg-btn" data-eg="${exObj.eng.replace(/"/g, '&quot;')}" style="background:transparent; border:none; cursor:pointer; font-size:18px; padding:4px;">🎤</button>
+                        </div>
+                    </div>
+                    <div class="shadow-result-container" style="display:none; font-size:13px; margin-top:4px; margin-bottom:6px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px;"></div>`;
+                flashcardEgsContainer.appendChild(egDiv);
+            });
+            flashcardEgsContainer.querySelectorAll('.play-single-eg-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => { e.stopPropagation(); speakTTS(e.currentTarget.getAttribute('data-eg'), 'en-US'); });
+            });
+            flashcardEgsContainer.querySelectorAll('.record-single-eg-btn').forEach(btn => {
+                setupShadowing(btn, btn.getAttribute('data-eg'), btn.closest('.eg-item').querySelector('.shadow-result-container'));
+            });
         }
 
         wordLoading.style.display = 'none';
@@ -4552,17 +4742,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (rawUrl.startsWith('http')) audioUrl = rawUrl;
                 else audioUrl = '';  // 不確定的 URL 一律清空，改用 TTS
                 
-                let foundDef = false;
+                // 收集所有詞性的定義（最多每詞性 4 條）
+                let allMeanings = [];
                 for (let m of entry.meanings) {
+                    const defs = [];
                     for (let d of m.definitions) {
-                        if (d.definition && !foundDef) {
-                            engDef = d.definition;
-                            foundDef = true;
-                        }
-                        if (d.example && examplesRaw.length < 3) {
-                            examplesRaw.push(d.example);
-                        }
+                        if (!engDef && d.definition) engDef = d.definition; // 保留第一條供舊邏輯
+                        defs.push({ definition: d.definition, example: d.example || '' });
+                        if (d.example && examplesRaw.length < 4) examplesRaw.push(d.example);
+                        if (defs.length >= 5) break;
                     }
+                    // 過濾同義詞：只保留 Datamuse 頻率 > 0 的常用字（異步驗證）
+                    const rawSyns = [...(m.synonyms || [])];
+                    const rawAnts = [...(m.antonyms || [])];
+                    allMeanings.push({
+                        partOfSpeech: m.partOfSpeech,
+                        definitions: defs,
+                        synonyms: rawSyns,
+                        antonyms: rawAnts,
+                    });
                 }
             }
             // 若字典 API 沒有例句，嘗試從 Datamuse 抓例句
@@ -4625,10 +4823,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             return {
-                word, ipa, audioUrl, 
+                word, ipa, audioUrl,
                 freqScore, frequencyRaw,
                 engDef, chiDef: `[${chiDefBase}] ${chiDefExpl}`,
-                examples: processedExamples
+                examples: processedExamples,
+                allMeanings: allMeanings || []
             };
         } catch (e) {
             console.error('Words API Error:', e);
@@ -6315,15 +6514,28 @@ document.addEventListener('DOMContentLoaded', () => {
                             html += `</div>`;
                         });
 
-                        // Synonyms for this POS
+                        // 同義詞（先顯示佔位，異步驗證後更新）
                         if (m.synonyms && m.synonyms.length > 0) {
-                            const syns = m.synonyms.slice(0, 6).join(', ');
-                            html += `<div style="font-size:11px; color:#94a3b8; margin-top:4px;">同義詞：<span style="color:#6ee7b7;">${syns}</span></div>`;
+                            const synId = `fsyn_${mi}`;
+                            html += `<div id="${synId}" style="font-size:11px; color:#94a3b8; margin-top:4px;">同義詞：<span style="color:#6ee7b7; opacity:0.5;">驗證中...</span></div>`;
+                            // 異步驗證後更新（需在 innerHTML 設定後執行）
+                            setTimeout(() => {
+                                filterValidWords(m.synonyms).then(valid => {
+                                    const el = popBody.querySelector(`#${synId}`);
+                                    if (el) el.innerHTML = valid.length > 0 ? `同義詞：<span style="color:#6ee7b7;">${valid.join('、')}</span>` : '';
+                                });
+                            }, 50);
                         }
-                        // Antonyms
+                        // 反義詞（同樣驗證）
                         if (m.antonyms && m.antonyms.length > 0) {
-                            const ants = m.antonyms.slice(0, 4).join(', ');
-                            html += `<div style="font-size:11px; color:#94a3b8; margin-top:2px;">反義詞：<span style="color:#f87171;">${ants}</span></div>`;
+                            const antId = `fant_${mi}`;
+                            html += `<div id="${antId}" style="font-size:11px; color:#94a3b8; margin-top:2px;">反義詞：<span style="color:#f87171; opacity:0.5;">驗證中...</span></div>`;
+                            setTimeout(() => {
+                                filterValidWords(m.antonyms).then(valid => {
+                                    const el = popBody.querySelector(`#${antId}`);
+                                    if (el) el.innerHTML = valid.length > 0 ? `反義詞：<span style="color:#f87171;">${valid.join('、')}</span>` : '';
+                                });
+                            }, 50);
                         }
 
                         html += `</div>`;
