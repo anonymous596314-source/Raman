@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 
 <head>
@@ -1842,7 +1842,7 @@ span.pronounce-wrong {
             <div class="modal-header">
                 <h2>📈 每日歷史統計</h2>
                 <div style="display:flex; gap:8px; align-items:center;">
-                    <button id="historySnapshotBtn" class="btn secondary-btn" style="padding:6px 14px; font-size:13px; background:rgba(52,211,153,0.15); border-color:rgba(52,211,153,0.4); color:#6ee7b7;" title="把今日最新數據寫入歷史統計">📸 立即快照</button>
+                    <button id="historySnapshotBtn" class="btn secondary-btn" style="padding:6px 14px; font-size:13px; background:rgba(52,211,153,0.15); border-color:rgba(52,211,153,0.4); color:#6ee7b7;" title="更新今日損益與市值統計">🔄 立即更新</button>
                     <button class="close-btn" id="closeHistoryModalBtn">&times;</button>
                 </div>
             </div>
@@ -3485,7 +3485,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (dailyStats.length === 0) {
             const tr = document.createElement('tr');
-            tr.innerHTML = '<td colspan="8" style="padding:30px; text-align:center; color:#94a3b8;">尚無歷史統計資料。按「更新股價」或「立即快照」按鈕來記錄今日數據。</td>';
+            tr.innerHTML = '<td colspan="8" style="padding:30px; text-align:center; color:#94a3b8;">尚無歷史統計資料。按「更新股價」或「立即更新」按鈕來記錄今日數據。</td>';
             historyTableBody.appendChild(tr);
         }
     }
@@ -3503,12 +3503,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', async (e) => {
         if (e.target && e.target.id === 'historySnapshotBtn') {
             const btn = e.target;
-            btn.textContent = '⏳ 快照中...';
+            btn.textContent = '⏳ 更新中...';
             btn.disabled = true;
             await logDailyStats();
             renderHistoryTable();
             btn.textContent = '✅ 已更新';
-            setTimeout(() => { btn.textContent = '📸 立即快照'; btn.disabled = false; }, 1500);
+            setTimeout(() => { btn.textContent = '🔄 立即更新'; btn.disabled = false; }, 1500);
         }
     });
     if (closeHistoryModalBtn) {
@@ -4797,6 +4797,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ── 全域遊戲清除 ──────────────────────────────────────────
         let _gameCleanup = null;  // 目前遊戲的清理函數
+        let currentLoadedGame = null; // 紀錄當前載入的遊戲物件
 
         function cleanupCurrentGame() {
             if (_gameCleanup) {
@@ -4808,6 +4809,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function launchGame(g) {
+            currentLoadedGame = g;             // 紀錄遊戲物件以便「再玩一次」使用
             cleanupCurrentGame();              // 先清除舊遊戲
             gameMenuView.style.display = 'none';
             gamePlayView.style.display = 'flex';
@@ -5995,7 +5997,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {start:'cat',end:'dog',valid:['cat','bat','bad','bag','big','bid','did','dig','dog','cot','got','god','fat','fan','can','cap','cab','lab','lap','map','mad','mid','mud','bud','bug','dug','dug','fog']},
             {start:'cold',end:'warm',valid:['cold','cord','word','ward','warm','bold','told','toll','tall','talk','walk','wall','well','bell','belt','melt','felt','fall','ball','call','hall','hold','gold','goad','road','load','lead','read','head','heal','real','meal','seal','deal','teal','tear','wear','year','hear','heat','seat','neat','meat','beat','bean','lean','mean','team','tram','trap','wrap','warp']},
             {start:'head',end:'tail',valid:['head','bead','beat','belt','bell','ball','tall','tail','heat','meat','meal','teal','tell','sell','seal','real','deal','lead','load','road','toad','told','bold','gold','hold','hole','mole','role','rule','rile','tile','time','lime','line','wine','mine','pine','pint','hint','mint','mist','fist','fish','dish','wish','wisp','wasp','last','mast','past','fast','cast','cost','lost','loft','left','lest','best','rest','rust','gust','dust']},
-            {start:'hot',end:'cold',valid:['hot','cot','cat','bat','bad','bid','bud','cold','hog','log','lag','bag','ban','can','cap','cop','cob','cod','cog','con','cot','dot','fog','got','god','lot','nod','not','pod','pot','rod','rot','sob','sod','tog','top','tot']},
+            {start:'hot',end:'cold',valid:['hot','cot','cat','bat','bad','bid','bud','cold','hog','log','lag','bag','ban','can','cap','cop','cob','cod','cog','con','cot','dot','fog','got','god','hot','lot','not','pod','pot','rod','rot','sob','sod','tog','top','tot']},
             {start:'more',end:'less',valid:['more','bore','core','care','dare','hare','bare','base','case','lace','face','pace','race','rase','rise','wise','wide','ride','side','tide','hide','hire','fire','fare','hare','hale','tale','male','pale','sale','sole','mole','hole','role','rose','nose','note','vote','vole','lore','lore','loss','toss','boss','moss','less','mess','best','rest','test','text','next','nest','rest','jest','vest','west']},
             {start:'love',end:'hate',valid:['love','live','line','lime','like','bike','bite','site','sate','late','mate','gate','rate','date','fate','hate','have','cave','gave','cove','dove','done','bone','bane','lane','lame','game','same','sale','tale','male','pale','sale','sole','mole','hole','role','rose','nose','note','vote','dote','dome','home','come','came','game','fame']},
             {start:'win',end:'lose',valid:['win','bin','bit','bat','cat','car','bar','far','fat','lot','log','lag','bag','ban','can','cap','cop','dot','fog','got','god','hot','lot','not','pod','pot','rod','rot','sob','sod','ton','top','rot','rose','nose','note','vote','lore','loss','toss','boss','moss','lose']},
@@ -6074,7 +6076,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div style="width:${pct}%;height:100%;background:${pct>=80?'#34d399':pct>=50?'#fbbf24':'#f87171'};border-radius:5px;"></div>
                 </div>`;
             const rb=mkBtn('再玩一次 ↺','background:rgba(139,92,246,0.3);border:1px solid #8b5cf6;color:#fff;padding:12px 28px;border-radius:12px;cursor:pointer;font-size:16px;font-weight:700;');
-            rb.onclick=()=>{ cleanupCurrentGame(); gameMenuView.style.display='block'; gamePlayView.style.display='none'; setScore(''); currentGameTitle.textContent=''; };
+            rb.onclick=()=>{ 
+                if (currentLoadedGame) {
+                    launchGame(currentLoadedGame); 
+                } else {
+                    cleanupCurrentGame(); 
+                    gameMenuView.style.display='block'; 
+                    gamePlayView.style.display='none'; 
+                    setScore(''); 
+                    currentGameTitle.textContent='';
+                }
+            };
             card.appendChild(rb);
             gameContainer.appendChild(card);
         }
